@@ -1,5 +1,5 @@
 #!/bin/python
-# EMEA version
+# "Region" version
 # 08/16/2016 - switch stack change
 # 08/16/2016 - default-vars
 # 01/10/2017 - rewrite to use netaddr
@@ -7,6 +7,8 @@
 # 02/02/2017 - turn into method for testing
 # 02/08/2017 - EMEA version
 # 03/30/2017 - use Hostname for config file names
+# 04/06/2017 - "Region" version; use "test" for test data
+# ... so desktop version needs data in test folder
 import time
 import airspeed
 import math
@@ -19,7 +21,7 @@ import os
 # make changing templates easy
 rt_template_4351='var_template-iwan-isr'
 rt_template_4331='var_template-iwan-isr'
-sw_template='var_template-ss-switch-emea'
+sw_template='var_template-ss-switch'
 #
 
 # want to print extra stuff on the screen?
@@ -61,6 +63,7 @@ def get_varFile(desc,fid):
     
 def rtrConfig(varfile,region):
     from splitpfx import splitpfx
+    tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
     usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
     # initialize dictionary
@@ -84,11 +87,11 @@ def rtrConfig(varfile,region):
     # pick router template based on model
     # mask overrides value in site var file!!!
     if (var_dict['Router_Model']=='4331'):
-        tmpl_file = '%s/%s' % (dataPath,rt_template_4331)
+        tmpl_file = '%s/%s' % (tmplPath,rt_template_4331)
 
 
     else:
-        tmpl_file = '%s/%s' % (dataPath,rt_template_4351)
+        tmpl_file = '%s/%s' % (tmplPath,rt_template_4351)
 
     ipUser=IPNetwork( '%s/%s' % (var_dict['User_VLAN_Network'],var_dict['User_VLAN_Mask']))
     ipWireless=IPNetwork(var_dict['Wireless_VLAN_Network']+'/'+var_dict['Wireless_VLAN_Mask'])
@@ -146,13 +149,10 @@ def rtrConfig(varfile,region):
         var_dict['MPLS_Interface']='Unsupported'
         print ('* ERROR * MPLS interface not understood or program error')
     #
-    # Have to code for speeds in .5 Mbps increments :-(
-    if(var_dict['MPLS_Bandwidth']=='4500'):
-        var_dict['MPLS_Speed']='4.5MBPS'
-    elif(var_dict['MPLS_Bandwidth']=='1500'):
-        var_dict['MPLS_Speed']='1.5MBPS'
+    if  int(int(var_dict['MPLS_Bandwidth'])/1000.) * 1000 != int(var_dict['MPLS_Bandwidth']):
+        var_dict['MPLS_Speed']=str(int(var_dict['MPLS_Bandwidth'])/1000.)+'MBPS'
     else:
-        var_dict['MPLS_Speed']=str(int (int(var_dict['MPLS_Bandwidth'])/1000.) )+'MBPS'
+        var_dict['MPLS_Speed']=str(int(var_dict['MPLS_Bandwidth'])/1000.)[:-2]+'MBPS'
     # Handle Tunnel Addresses
     ipTun100=IPNetwork(var_dict['Tunnel_100_Address']+'/'+var_dict['Tunnel_100_Mask'])
     ipTun200=IPNetwork(var_dict['Tunnel_200_Address']+'/'+var_dict['Tunnel_200_Mask'])
@@ -164,7 +164,10 @@ def rtrConfig(varfile,region):
     #
     if var_dict['Internet_BW_Down']=='':
         var_dict['Internet_BW_Down']=var_dict['Internet_Bandwidth']
-    var_dict['Internet_Speed_Down']=str(int(var_dict['Internet_BW_Down' ])/1000)+'MBPS'
+    if  int(int(var_dict['Internet_BW_Down'])/1000.) * 1000 != int(var_dict['Internet_BW_Down']):
+        var_dict['Internet_Speed_Down']=str(int(var_dict['Internet_BW_Down'])/1000.)+'MBPS'
+    else:
+        var_dict['Internet_Speed_Down']=str(int(var_dict['Internet_BW_Down'])/1000.)[:-2]+'MBPS'
     #
     # x_BW is bandwidth in bps; x_Bandwidth is in Kbps
     var_dict['MPLS_BW']=var_dict['MPLS_Bandwidth']+'000'
@@ -214,6 +217,7 @@ def rtrConfig(varfile,region):
     return rtrConfig
     #
 def swConfig(varfile,region):
+    tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
     usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
     ipUser=IPNetwork( '%s/%s' % (var_dict['User_VLAN_Network'], var_dict['User_VLAN_Mask']))
@@ -237,7 +241,7 @@ def swConfig(varfile,region):
     swConfig = [swConfigName]
     sw_output.write('! SW Configuration generated: '+time.strftime("%Y-%m-%d %H:%M:%S")+'\n')
     #template=airspeed.Template( file('%s/%s' % (dataPath,sw_template) ).read() )
-    with open('%s/%s' % (dataPath,sw_template) ) as tmpl:
+    with open('%s/%s' % (tmplPath,sw_template) ) as tmpl:
             template=airspeed.Template( tmpl.read() )
     sw_output.write(template.merge(var_dict))
     sw_output.close()
@@ -245,8 +249,8 @@ def swConfig(varfile,region):
 
 print (" type 'show()' to see the dictionary ")
 def gen_config(vf):
-    rtrConfig(vf,'na')
-    swConfig (vf,'na')
+    rtrConfig(vf,'test')
+    swConfig (vf,'test')
 if __name__ == '__main__':
-    SiteNo=raw_input('site:').strip()
+    SiteNo=input('site:').strip()
     gen_config ('%s-vars' % (SiteNo) )
