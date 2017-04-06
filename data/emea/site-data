@@ -1,0 +1,7 @@
+SITENO	Site ID	Enterprise Site Designation
+SERIALNO	Router Serial No.	Chassis Serial Number for PNP"
+DC	Datacenter Preference	"Closest" Datacenter
+MPLS	MPLS Handoff	Ethernet, MLPPP or Frame Relay
+SPOKE	Spoke Router Mode	Spoke has Single or Dual Routers
+RMODEL	Router Model	Router Model for PNP
+PROJECT	APIC-EM Project Name	Project Name APIC-EM for PNP

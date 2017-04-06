@@ -1,0 +1,11 @@
+#VAR	Label	Value	Desc
+MPLS_Interface_Type	MPLS Handoff	Ethernet	one of Ethernet, MLPPP, Frame Relay
+MPLS_Bandwidth	MPLS Bandwidth	10000	Port speed (subscribed rate)
+MPLS_Circuit_ID	MPLS Circuit ID	<LEC circuit ID>	Provider Circuit Information
+#	#		
+MPLS_IP_GW	MPLS IP Gateway	<no default>	Gateway IP address of MPLS Network
+MPLS_IP_Addr	MPLS IP Address	<no default>	Local IP address of MPLS Network
+MPLS_Mask	MPLS Mask	255.255.255.252	Network Mask
+#	#		
+MPLS_Interface	MPLS Interface	GigabitEthernet0/0/1	Physical Interface of MPLS Connection
+MPLS_SubIntf	MPLS SubInterface	NONE	Subinterface (leave as 'NONE' if not applicable.

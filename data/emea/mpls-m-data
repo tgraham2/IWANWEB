@@ -1,0 +1,14 @@
+#MPLS_Interface_Type		MLPPP	
+MPLS_Bandwidth		4500	Bandwidth (1500 x number of links)
+MPLS_Circuit_ID		<LEC circuit ID>	Provider Circuit Information
+#			
+MPLS_IP_GW		<no default>	Gateway IP address of MPLS Network
+MPLS_IP_Addr		<no default>	Local IP address of MPLS Network
+MPLS_Mask		255.255.255.252	Network Mask
+#			
+MPLS_Interface_Number_of_Links		3	Physical Interface of MPLS Connection
+MPLS_PPP_Hostname		<ppp_hostname>	Frame Relay DLCI for Handoff
+MPLS_Interface_1		Serial0/1/3:0	Interfaces used for MLPPP bundle formation
+MPLS_Interface_2		Serial0/1/2:0	Interfaces used for MLPPP bundle formation
+MPLS_Interface_3		Serial0/1/1:0	Interfaces used for MLPPP bundle formation
+MPLS_Interface_4		Serial0/1/0:0	Interfaces used for MLPPP bundle formation

@@ -1,0 +1,25 @@
+img {
+	background: white;
+	}
+table, th, td {
+    border: 1px solid black;
+	font-family: verdana;
+    font-size: 12px;
+	background-color: lightblue;
+	font-weight: normal;
+	}
+.invisible-table {
+	border: none;
+	font-family: verdana;
+    font-size: 20px;
+	background-color: lightblue;
+	font-weight: normal;
+	width: 250px;
+	}
+.value { 
+	font-weight: bold;
+	color: darkblue;
+	}
+body {
+	background-image: url("https://www.allegisgroup.com/_res/allegisgroup/img/testimonial-bg.jpg");
+    }

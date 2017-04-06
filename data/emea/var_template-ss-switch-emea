@@ -1,0 +1,324 @@
+!
+!
+
+
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+! City $City
+hostname #set($hostname = "${City}ss01")$hostname
+!
+enable secret 5 $ENABLE_KEY5
+!
+#if($SWBOOT1)boot system flash bootflash:$SWBOOT1
+#{end}
+#if($SWBOOT2)boot system flash bootflash:$SWBOOT2
+#{end}
+#if($SWBOOT3)boot system flash bootflash:$SWBOOT3
+#{end}
+#if($SWBOOT4)boot system flash bootflash:$SWBOOT4
+#{end}
+!
+#if($USER_1)username $USER_1 privilege 15 password 7 $USER1_PW7
+#{end}
+#if($USER_2)username $USER_2 privilege 15 password 7 $USER2_PW7
+#{end}
+#if($USER_3)username $USER_3 privilege 15 password 7 $USER3_PW7
+#{end}
+#if($USER_4)username $USER_4 privilege 15 password 7 $USER4_PW7
+#{end}!
+aaa new-model
+!
+aaa group server tacacs+ $TAC_GROUP
+ server name $TAC_HOST1
+ server name $TAC_HOST2
+!
+aaa authentication login default group $TAC_GROUP local
+aaa authorization config-commands
+aaa authorization exec default group $TAC_GROUP local if-authenticated 
+aaa authorization commands 7 default group $TAC_GROUP local if-authenticated 
+aaa authorization commands 15 default group $TAC_GROUP local if-authenticated 
+aaa accounting exec default start-stop group $TAC_GROUP
+aaa accounting commands 7 default start-stop group $TAC_GROUP
+aaa accounting commands 15 default start-stop group $TAC_GROUP
+aaa accounting connection default start-stop group $TAC_GROUP
+aaa accounting system default start-stop group $TAC_GROUP
+!
+aaa session-id common
+!
+!
+!
+!
+clock timezone EST -5 0
+clock summer-time EDT recurring
+
+#if($Router_Model == '4331')!
+#{else}switch 1 provision ws-c3650-48pd 
+#if($Switch_Stack_Size > 1)switch 2 provision ws-c3650-48pd
+#{end}
+#if($Switch_Stack_Size > 2)switch 3 provision ws-c3650-48pd
+#{end}
+#if($Switch_Stack_Size > 3)switch 4 provision ws-c3650-48pd
+#{end}
+#if($Switch_Stack_Size > 4)switch 5 provision ws-c3650-48pd
+#{end}
+#if($Switch_Stack_Size > 5)switch 6 provision ws-c3650-48pd
+#{end}
+#if($Switch_Stack_Size > 6)switch 7 provision ws-c3650-48pd
+#{end}
+#if($Switch_Stack_Size > 7)switch 8 provision ws-c3650-48pd
+#{end}#{end}
+!
+!
+!
+no ip domain-lookup
+ip domain-name allegisgroup.com
+!
+!
+!
+#if($Router_Model == '4331')vtp mode client
+vtp domain 4331
+vtp version 3
+vtp password 4331pass
+#{else}vtp domain allegis
+vtp mode transparent
+#{end}!
+table-map policed-dscp
+ map from  0 to 8
+ map from  10 to 8
+ map from  18 to 8
+ map from  24 to 8
+ map from  46 to 8
+ default copy
+!
+!
+errdisable recovery cause bpduguard
+diagnostic bootup level minimal
+spanning-tree mode rapid-pvst
+spanning-tree extend system-id
+#if($Router_Model == '4331')!
+#{else}hw-switch switch 1 logging onboard message level 3
+#if($Switch_Stack_Size > 1)hw-switch switch 2 logging onboard message level 3
+#{end}
+#if($Switch_Stack_Size > 2)hw-switch switch 3 logging onboard message level 3
+#{end}
+#if($Switch_Stack_Size > 3)hw-switch switch 4 logging onboard message level 3
+#{end}
+#if($Switch_Stack_Size > 4)hw-switch switch 5 logging onboard message level 3
+#{end}
+#if($Switch_Stack_Size > 5)hw-switch switch 6 logging onboard message level 3
+#{end}
+#if($Switch_Stack_Size > 6)hw-switch switch 7 logging onboard message level 3
+#{end}
+#if($Switch_Stack_Size > 7)hw-switch switch 8 logging onboard message level 3
+#{end}#{end}
+!
+redundancy
+ mode sso
+!
+! Create Vlans
+vlan 2
+ name Data
+!
+vlan 10
+ name wireless
+!
+vlan 11
+ name Voice
+!
+
+! Add Data and Voice Vlans to interfaces with Auto QoS
+!
+#if($Router_Model == '4331')interface GigabitEthernet0/1
+ description  <Printer_>
+ switchport access vlan 2
+ spanning-tree portfast
+!
+interface range gi 0/2 - 24
+ description Station Port
+ switchport access vlan 2
+ switchport voice vlan 11
+ trust device cisco-phone
+ auto qos voip cisco-phone 
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+ !
+interface GigabitEthernet0/26
+ description BACKPLANE TRUNK FROM 4331 ROUTER ETHERNET-INTERNAL 1/0/0
+ switchport trunk native vlan 2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport protected
+ priority-queue out 
+ mls qos trust dscp
+ no shut
+!
+#{else}#foreach ($sw in $Switch_Stack)!
+#set ($intf = 'interface range GigabitEthernet' + $sw +'/0/1 - 2')$intf
+ description <AP>
+ switchport trunk native vlan 10
+ switchport mode trunk
+!
+#set ($intf = 'interface range GigabitEthernet' + $sw +'/0/3 - 46')$intf
+ description Station Port
+ switchport access vlan 2
+ switchport voice vlan 11
+ trust device cisco-phone
+ auto qos voip cisco-phone 
+ spanning-tree portfast
+ spanning-tree bpduguard enable
+!
+#set ($intf = 'interface range GigabitEthernet' + $sw +'/0/47 - 48')$intf
+ description <AP>
+ switchport trunk native vlan 10
+ switchport mode trunk
+!
+#if($sw == '1')
+interface GigabitEthernet1/1/1
+ description conn to $Hostname Gi0/0/0
+ switchport trunk native vlan 2
+ switchport trunk allowed vlan 2,10,11
+ switchport mode trunk
+ no shutdown
+#{end}#{end}
+!
+#set($EthX='Gigabit')#if($TenG_Switch=='T')#set($EthX='TenGig')#{end}
+interface $EthX 1/1/3
+ description  <Server_>
+ switchport access vlan 2
+ spanning-tree portfast
+!
+! If there is a second Switch in the stack
+!
+#if($Switch_Stack_Size >= 2) interface $EthX 2/1/3
+ description  <Server_>
+ switchport access vlan 2
+ spanning-tree portfast
+#{end}#{end}
+!
+! Create Vlan Interface
+!
+interface vlan 2
+no shutdown
+description data 
+ip addr $Switch_Address $User_VLAN_Mask
+!
+ip default-gateway $User_VLAN_Address
+!
+no ip http server
+no ip http secure-server
+ip tacacs source-interface Vlan2
+ip ssh time-out 20
+ip ssh source-interface Vlan2
+ip ssh version 2
+ip scp server enable
+!
+access-list 9 permit any
+!
+snmp-server user nnmv3 GR_SNMPv3 v3 auth sha #N3wSnmpR0!
+snmp-server group nnmv3 v3 auth
+snmp-server group GR_SNMPv3 v3 auth read SNMPv3_Read write SNMPv3_Write access 9
+snmp-server view SNMPv3_Read iso included
+snmp-server view SNMPv3_Write iso included
+snmp-server trap-source Vlan2
+snmp-server location $City, $State
+snmp-server packetsize 1372
+snmp-server tftp-server-list 9
+snmp-server enable traps snmp authentication linkdown linkup coldstart warmstart
+snmp-server enable traps flowmon
+snmp-server enable traps transceiver all
+snmp-server enable traps call-home message-send-fail server-fail
+snmp-server enable traps rf
+snmp-server enable traps memory
+snmp-server enable traps cpu threshold
+snmp-server enable traps wireless bsnMobileStation bsnAccessPoint bsnRogue bsn80211Security bsnAutoRF bsnGeneral client mobility RRM mfp AP rogue
+snmp-server enable traps tty
+snmp-server enable traps auth-framework sec-violation
+snmp-server enable traps flash insertion removal
+snmp-server enable traps power-ethernet group 1
+snmp-server enable traps power-ethernet group 2
+snmp-server enable traps power-ethernet group 3
+snmp-server enable traps power-ethernet police
+snmp-server enable traps vtp
+snmp-server enable traps vlancreate
+snmp-server enable traps vlandelete
+snmp-server enable traps license
+snmp-server enable traps envmon fan shutdown supply temperature status
+snmp-server enable traps stackwise
+snmp-server enable traps port-security
+snmp-server enable traps fru-ctrl
+snmp-server enable traps entity
+snmp-server enable traps cef resource-failure peer-state-change peer-fib-state-change inconsistency
+snmp-server enable traps config-copy
+snmp-server enable traps config
+snmp-server enable traps config-ctid
+snmp-server enable traps event-manager
+snmp-server enable traps hsrp
+snmp-server enable traps errdisable
+snmp-server enable traps mac-notification change move threshold
+snmp-server enable traps vlan-membership
+snmp ifmib ifindex persist
+#if($SNMP_ADDR1)snmp-server host $SNMP_ADDR1 version 3 auth nnmv3
+#{end}
+#if($SNMP_ADDR2)snmp-server host $SNMP_ADDR2 version 3 auth nnmv3
+#{end}
+#if($SNMP_ADDR3)snmp-server host $SNMP_ADDR3 version 3 auth nnmv3
+#{end}
+#if($SNMP_ADDR4)snmp-server host $SNMP_ADDR4 version 3 auth nnmv3 
+#{end}
+#if($SNMP_ADDR5)snmp-server host $SNMP_ADDR5 version 3 auth nnmv3 
+#{end}
+#if($SNMP_ADDR6)snmp-server host $SNMP_ADDR6 version 3 auth nnmv3 
+#{end}
+!
+tacacs server $TAC_HOST1
+ address ipv4 $TAC_ADDR1
+ key 7 $TAC_KEY71
+tacacs server $TAC_HOST2
+ address ipv4 $TAC_ADDR2
+ key 7 $TAC_KEY72
+!
+
+banner login @     
+    ***********************************************************
+    *                                                         *
+    *     Property of Allegis Group. Unauthorized use         *
+    *         may result in Criminal Prosecution              *
+    *                                                         *
+    *     Allegis Group's Information Services products,      *
+    *    including: network, E-mail, voicemail, telephone,    *
+    *       Internet services, and computers, are to be       *
+    *       used for Company business only and are not        *
+    *        intended for personal use. Allegis Group         *
+    *      reserves the right to monitor and access all       *
+    *        information systems at any time with or          *
+    *        without an employee's advance notice or          *
+    *     consent.  Such access may occur before, during,     *
+    *    or after working hours, and may be performed by      *
+    *        any supervisor, manager, or personnel            *
+    *                designated by the Company.               *
+    *                                                         *
+    ***********************************************************
+
+@
+
+!
+line con 0
+ exec-timeout 20 0
+ password 7 $CONPW7
+ logging synchronous
+ stopbits 1
+line vty 0 4
+ access-class 9 in
+ exec-timeout 20 0
+ password 7 $TTYPW7
+ logging synchronous
+ transport input ssh
+line vty 5 15
+ access-class 9 in
+ exec-timeout 20 0
+ password 7 $TTYPW7
+ logging synchronous
+ transport input ssh
+ 
+ end

@@ -1,0 +1,53 @@
+#EMEA version
+# defaults for when Internet info is not available
+Internet_Bandwidth	5000
+Internet_Service	upload/download
+Internet_Carrier	MetTel
+Carrier_Circuit_ID	Carrier-circuit-id
+Internet_ISP	ISP
+ISP_Circuit_ID	ISP-circuit-id
+Internet_Circuit_ID	<inet-circuit>
+Internet_IP_GW	1.1.1.2
+Internet_Mask	255.255.255.252	
+Internet_IP_Addr	1.1.1.1
+#
+# defaults for infrequently changing vars
+#
+aaa	radius
+#
+LAN_Intf	GigabitEthernet0/0/0
+User_VLAN_Number	180
+Wireless_VLAN_Number	10
+IPT_VLAN_Number	182
+User_VLAN_Mask	255.255.255.0
+Wireless_VLAN_Mask	255.255.255.0
+IPT_VLAN_Mask	255.255.255.0
+SPOKE	SINGLE
+#
+Internet_Intf	GigabitEthernet0/0/2
+Internet_BW_Down	5000	
+#
+MPLS_Mask	255.255.255.252
+MPLS_Interface_Type	Ethernet
+MPLS_Intf	GigabitEthernet0/0/1
+#	
+TenG_Switch	F
+Router_Model	ISR4351/K9
+ESM	N
+Router_Gen	T
+Switch_Gen	T
+Switch_Stack_Size	1
+Tunnel_100_Mask	255.255.252.0
+Tunnel_200_Mask	255.255.252.0
+DC	DC1
+#
+User2_VLAN_Number	
+User2_VLAN_Mask	255.255.255.0
+User3_VLAN_Number	
+User3_VLAN_Mask	255.255.255.0
+Customer_VLAN_Number	
+Customer_VLAN_Mask	255.255.255.0
+#
+SPOKE	SINGLE
+R	R
+END	END

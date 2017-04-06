@@ -1,0 +1,10 @@
+#MPLS_Interface_Type	MPLS Handoff	FrameRelay	
+MPLS_Bandwidth	MPLS Bandwidth	1536	Bandwidth (default is 1536)
+MPLS_Circuit_ID	MPLS Circuit ID	<LEC circuit ID>	Provider Circuit Information
+#	#		
+MPLS_IP_GW	MPLS IP Gateway	<no default>	Gateway IP address of MPLS Network
+MPLS_IP_Addr	MPLS IP Address	<no default>	Local IP address of MPLS Network
+MPLS_Mask	MPLS Mask	255.255.255.252	Network Mask
+#	#		
+MPLS_Interface	MPLS Interface	Serial0/1/3:0	Physical Interface of MPLS Connection
+MPLS_Frame_DLCI	MPLS Frame Relay DLCI	50	Frame Relay DLCI for Handoff

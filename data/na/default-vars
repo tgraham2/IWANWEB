@@ -1,0 +1,47 @@
+#
+# defaults for when Internet info is not available
+Internet_Bandwidth	5000
+Internet_Service	upload/download
+Internet_Carrier	MetTel
+Carrier_Circuit_ID	Carrier-circuit-id
+Internet_ISP	ISP
+ISP_Circuit_ID	ISP-circuit-id
+Internet_Circuit_ID	<inet-circuit>
+Internet_IP_GW	1.1.1.2
+Internet_Mask	255.255.255.252	
+Internet_IP_Addr	1.1.1.1
+#
+# defaults for infrequently changing vars
+#
+Router	R
+#
+LAN_Intf	GigabitEthernet0/0/0
+User_VLAN_Number	2
+Wireless_VLAN_Number	10
+IPT_VLAN_Number	11
+User_VLAN_Mask	255.255.255.0
+Wireless_VLAN_Mask	255.255.255.0
+IPT_VLAN_Mask	255.255.255.0
+SPOKE	SINGLE
+#
+Internet_Intf	GigabitEthernet0/0/2
+Internet_BW_Down	5000	
+#
+MPLS_IP_Mask	255.255.255.252
+MPLS_Interface_Type	Ethernet
+MPLS_Intf	GigabitEthernet0/0/1
+#	
+TenG_Switch	F
+Router_Model	4351
+Router_Gen	T
+Switch_Gen	T
+Switch_Stack_Size	0
+Tunnel_100_Mask	255.255.252.0
+Tunnel_200_Mask	255.255.252.0
+#
+Customer_VLAN_Number	NONE
+Customer_VLAN_Mask	255.255.255.0
+#
+User2_VLAN_Number	NONE
+User2_VLAN_Mask	255.255.255.0
+END	END

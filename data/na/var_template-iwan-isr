@@ -1,0 +1,797 @@
+#if( $MPLS_SubIf )#set( $MPLS_SubIf = '.' + $MPLS_SubIf )#else#set( $MPLS_SubIf = '')#{end}
+service timestamps debug datetime msec localtime show-timezone
+service timestamps log datetime msec localtime show-timezone
+service password-encryption
+!
+hostname #set($hostname = $City +'_' + $SiteNo + '_R_'+ $Router)$hostname
+boot-start-marker
+#if($BOOT1)boot system flash bootflash:$BOOT1
+#{end}
+#if($BOOT2)boot system flash bootflash:$BOOT2
+#{end}
+#if($BOOT3)boot system flash bootflash:$BOOT3
+#{end}
+#if($BOOT4)boot system flash bootflash:$BOOT4
+#{end}
+boot-end-marker
+!
+#if( ($Router == '02') or ($SPOKE == 'SINGLE'))vrf definition $INET_VRF
+!
+ address-family ipv4
+ exit-address-family
+#{end}
+!
+#if($Router == '01')vrf definition $MPLS_VRF
+!
+ address-family ipv4
+ exit-address-family
+#{end}
+!
+card type t1 0 1
+logging buffered 100000
+!
+enable secret 5 $ENABLE_KEY5
+!
+aaa new-model
+!
+aaa group server tacacs+ $TAC_GROUP
+ server name $TAC_HOST1
+ server name $TAC_HOST2
+!
+aaa authentication login default group $TAC_GROUP local
+aaa authorization config-commands
+aaa authorization exec default group $TAC_GROUP local if-authenticated 
+aaa authorization commands 7 default group $TAC_GROUP local if-authenticated 
+aaa authorization commands 15 default group $TAC_GROUP local if-authenticated 
+aaa accounting exec default start-stop group $TAC_GROUP
+aaa accounting commands 7 default start-stop group $TAC_GROUP
+aaa accounting commands 15 default start-stop group $TAC_GROUP
+aaa accounting connection default start-stop group $TAC_GROUP
+aaa accounting system default start-stop group $TAC_GROUP
+!
+aaa session-id common
+clock timezone EST -5 0
+clock summer-time EDT recurring
+!
+#if($Router_Model == 'ISR4351/K9')ip host broke 2001 $Router_Loopback
+#end
+!
+ip nbar protocol-pack bootflash:$PPACK
+!
+no ip domain lookup
+ip domain name allegisgroup.com
+!
+subscriber templating
+!
+crypto key generate rsa modulus 2048
+!
+multilink bundle-name authenticated
+!
+domain IWAN
+ vrf default
+  border
+   source-interface Loopback0
+#if($Router == '01')   master local
+  master branch
+   site-prefixes prefix-list SPOKE_PREFIX
+   source-interface Loopback0
+   hub $IWAN_MC_ADDR
+#{else}  master $IWAN_MASTER
+#{end}
+!
+#if($Router_Model == 'ISR4331/K9')ethernet-internal subslot 1/0
+ platform switchport svi
+!
+#{end}
+spanning-tree extend system-id
+!
+#if($USER_1)username $USER_1 privilege 15 password 7 $USER1_PW7
+#{end}
+#if($USER_2)username $USER_2 privilege 15 password 7 $USER2_PW7
+#{end}
+#if($USER_3)username $USER_3 privilege 15 password 7 $USER3_PW7
+#{end}
+#if($USER_4)username $USER_4 privilege 15 password 7 $USER4_PW7
+#{end}!
+!
+redundancy
+ mode none
+!
+#if($Router == '01')crypto ikev2 keyring DMVPN-KEYRING-1
+ peer ANY
+  address 0.0.0.0 0.0.0.0
+  pre-shared-key $IKEV_KEY1
+#{end}
+!
+#if( ($Router == '02') or ($SPOKE == 'SINGLE'))crypto ikev2 keyring DMVPN-KEYRING-2
+ peer ANY
+  address 0.0.0.0 0.0.0.0
+  pre-shared-key $IKEV_KEY2
+#{end}
+!
+#if( ($Router == '02') or ($SPOKE == 'SINGLE'))crypto ikev2 profile FVRF-IKEv2-in
+ match fvrf $INET_VRF
+ match identity remote address 0.0.0.0 
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local DMVPN-KEYRING-2
+#{end}
+!
+#if($Router == '01')crypto ikev2 profile FVRF-IKEv2-na
+ match fvrf $MPLS_VRF
+ match identity remote address 0.0.0.0 
+ authentication remote pre-share
+ authentication local pre-share
+ keyring local DMVPN-KEYRING-1
+#{end}
+crypto ikev2 dpd 40 5 on-demand
+!
+#if($Router == '01')
+#if($MPLS_Interface_Type == 'mppp')
+#foreach($j in [1..${iMPLS_Interface_Number_of_Links}])
+#if($j == 1)controller T1 0/1/3
+#elseif($j == 2)controller T1 0/1/2
+#elseif($j == 3)controller T1 0/1/1
+#{end} framing esf
+ linecode b8zs
+ cablelength long 0db
+ channel-group 0 timeslots 1-24
+#end#end
+#if($MPLS_Interface_Type == 'frame')controller T1 0/1/3
+ framing esf
+ linecode b8zs
+ cablelength long 0db
+ channel-group 0 timeslots 1-24
+#end
+#{end}
+!
+
+#if($Router_Model == 'ISR4331/K9')vtp mode server
+vtp domain 4331
+vtp version 3
+vtp password 4331pass
+#{end}!
+!
+ip tcp path-mtu-discovery
+!
+class-map match-any EGRESS-CRITICAL-DATA
+ match dscp af31 
+class-map match-any STREAMING-VIDEO
+ match dscp af21  af31  af32 
+class-map match-any INTERACTIVE-VIDEO
+ match dscp cs4  af41  af42 
+ match protocol skype
+class-map match-any CRITICAL-DATA
+ match access-group name MISSION-CRITICAL-DATA
+ match protocol salesforce
+class-map match-any NET-CTRL-MGMT
+ match dscp cs2  cs6 
+class-map match-any VOICE
+ match dscp ef 
+ match protocol cisco-jabber-audio
+ match protocol rtcp
+ match protocol rtp-audio
+ match protocol cisco-phone-audio
+class-map match-any SCAVENGER
+ match dscp cs1  af11 
+class-map match-any CALL-SIGNALING
+ match dscp cs3  af41 
+ match protocol sip
+ match protocol cisco-jabber-control
+ match protocol cisco-phone
+!
+policy-map WAN_CHILD_POLICY
+ class VOICE
+  priority level 1
+  police cir percent 33
+  set dscp ef
+ class INTERACTIVE-VIDEO
+  bandwidth remaining percent 30 
+  random-detect dscp-based
+  set dscp af42
+ class CALL-SIGNALING
+  bandwidth remaining percent 6 
+  set dscp af41
+ class STREAMING-VIDEO
+  bandwidth remaining percent 12 
+  random-detect dscp-based
+  set dscp af21
+ class NET-CTRL-MGMT
+  bandwidth remaining percent 5 
+  set dscp cs6
+ class SCAVENGER
+  bandwidth remaining percent 1 
+  set dscp af11
+ class EGRESS-CRITICAL-DATA
+  bandwidth remaining percent 35 
+  set dscp af31
+ class class-default
+  bandwidth remaining percent 4 
+  random-detect
+  set dscp default
+!
+#if($Router == '01')
+#if($MPLS_Interface_Type == 'frame')policy-map Serial0/1/3:0_MPLS_PARENT_POLICY
+#elseif($MPLS_Interface_Type == 'mppp')policy-map Multilink123_MPLS_PARENT_POLICY
+#{else}policy-map #set( $p = $MPLS_Intf + '_MPLS_PARENT_POLICY')${p}
+#{end}
+ class class-default
+  shape average #set($mpls_bw=$MPLS_Bandwidth +'000')$mpls_bw  
+   service-policy WAN_CHILD_POLICY
+#{end}
+!
+#if( ($Router == '02') or ($SPOKE == 'SINGLE'))policy-map #set($INET_PARENT_POLICY=$Internet_Intf + '_INET_PARENT_POLICY')$INET_PARENT_POLICY
+ class class-default
+  shape average #set($inet_bw=$Internet_Bandwidth+'000')$inet_bw   
+   service-policy WAN_CHILD_POLICY
+#{end}
+!
+policy-map INGRESS_DSCP_MARKING_POLICY
+ class NET-CTRL-MGMT
+  set dscp cs6
+ class STREAMING-VIDEO
+  set dscp af21
+ class INTERACTIVE-VIDEO
+  set dscp af42
+ class CRITICAL-DATA
+  set dscp af31
+ class VOICE
+  set dscp ef
+ class SCAVENGER
+  set dscp af11
+ class CALL-SIGNALING
+  set dscp af41
+ class class-default
+  set ip dscp default
+
+! 
+crypto ipsec security-association replay window-size 1024
+!
+crypto ipsec transform-set AES256/SHA/TRANSPORT esp-aes 256 esp-sha-hmac 
+ mode transport
+!
+crypto ipsec profile DMVPN-PROFILE-1
+ description MPLS Profile
+ set transform-set AES256/SHA/TRANSPORT 
+ set ikev2-profile FVRF-IKEv2-na
+!
+crypto ipsec profile DMVPN-PROFILE-2
+ description INET Profile
+ set transform-set AES256/SHA/TRANSPORT 
+ set ikev2-profile FVRF-IKEv2-in
+! 
+interface Loopback0
+ description Loopback0 Management Interface
+ ip address $Router_Loopback 255.255.255.255
+ 
+#if($MPLS_Interface_Type == 'frame')interface Serial0/1/3:0
+ no ip address
+ encapsulation frame-relay
+ service-policy output Serial0/1/3:0_MPLS_PARENT_POLICY
+!
+interface Serial0/1/3:0.$FRAME_DLCI point-to-point
+ description Verizon MPLS VPN: $MPLS_Circuit_ID
+ bandwidth 1536
+ vrf forwarding na
+ ip address $MPLS_IP_Addr $MPLS_Mask
+ frame-relay interface-dlci $FRAME_DLCI IETF   
+#{end}!
+
+#if($MPLS_Interface_Type == 'mppp')interface Multilink123
+ desc Verizon MPLS VPN Circuit ID: $MPLS_Circuit_ID
+ vrf forwarding $MPLS_VRF
+ ip address $MPLS_IP_Addr $MPLS_Mask
+ ppp chap hostname $PPP_HOSTNAME
+ ppp multilink
+ ppp multilink links minimum 1
+ ppp multilink group 123
+ ppp multilink fragment disable
+ no cdp enable
+ service-policy output WAN_CHILD_POLICY
+#foreach($j in [1..${iMPLS_Interface_Number_of_Links}])
+#if($j == 1)interface Serial0/1/3:0
+#elseif($j == 2)interface Serial0/1/2:0
+#elseif($j == 3)interface Serial0/1/1:0
+#{end} bandwidth 1536
+ no ip address
+ encapsulation ppp
+ ppp chap hostname $PPP_HOSTNAME
+ ppp multilink
+ ppp multilink group 123
+ no cdp enable
+#{end}
+#{end}
+!
+#if($Router == '01')interface Tunnel100
+ description MPLS Cloud
+ bandwidth $MPLS_Bandwidth
+ ip address $Tunnel_100_Address $Tunnel_100_Mask
+ no ip redirects
+ ip mtu 1400
+ ip nbar protocol-discovery
+ ip nhrp authentication $IWAN_AUTH
+ ip nhrp group RS-GROUP-100-$MPLS_Speed
+ ip nhrp network-id 1
+ ip nhrp holdtime 600
+ ip nhrp nhs $NHS1_ADDR100 nbma $NBMA1_ADDR100 multicast
+ #if($NBMA2_ADDR100)ip nhrp nhs $NHS2_ADDR100 nbma $NBMA2_ADDR100 multicast
+ #{end}
+ ip nhrp registration no-unique
+ ip nhrp registration timeout 60
+ ip nhrp shortcut
+ ip tcp adjust-mss 1360
+ load-interval 30
+ no delay
+ shutdown
+ no nhrp route-watch
+ if-state nhrp
+ tunnel source #if($MPLS_Interface_Type == 'mppp')#set($tunnel_source = 'Multilink123')
+#elseif($MPLS_Interface_Type == 'frame')#set($tunnel_source='Se0/1/3:0'+'.'+$FRAME_DLCI)
+#else#set( $tunnel_source = $MPLS_Intf + $!{MPLS_SubIf} )#{end}$tunnel_source
+ tunnel mode gre multipoint
+ tunnel key 100
+ tunnel vrf $MPLS_VRF
+ tunnel protection ipsec profile DMVPN-PROFILE-1
+#{end}
+!
+#if( ($Router == '02') or ($SPOKE == 'SINGLE') )interface Tunnel200
+ description INET Cloud
+ bandwidth $Internet_Bandwidth
+ ip address $Tunnel_200_Address $Tunnel_200_Mask
+ no ip redirects
+ ip mtu 1400
+ ip nbar protocol-discovery
+ ip nhrp authentication 1WANAuth
+ ip nhrp group RS-GROUP-200-$Internet_Speed_Down
+ ip nhrp network-id 2
+ ip nhrp holdtime 600
+ ip nhrp nhs $NHS1_ADDR200 nbma $NBMA1_ADDR200 multicast
+#if($NBMA2_ADDR200)ip nhrp nhs $NHS2_ADDR200 nbma $NBMA2_ADDR200 multicast
+ #{end}
+ ip nhrp registration no-unique
+ ip nhrp registration timeout 60
+ ip nhrp shortcut
+ ip tcp adjust-mss 1360
+ load-interval 30
+ no delay
+ shutdown
+ no nhrp route-watch
+ if-state nhrp
+ tunnel source $Internet_Intf
+ tunnel mode gre multipoint
+ tunnel key 200
+ tunnel vrf $INET_VRF
+ tunnel protection ipsec profile DMVPN-PROFILE-2
+#{end}
+!
+#if($Router_Model=='ISR4351/K9')interface $LAN_Intf
+ description Gi0/0/0 Trunk to $Switch_Hostname  Gi #set($intf = $Router + '/1/1')$intf
+ no ip address
+ ip nbar protocol-discovery ipv4
+ no shut
+ negotiation auto
+!
+interface $LAN_Intf.$User_VLAN_Number
+ description Wired LAN
+ encapsulation dot1Q $User_VLAN_Number native
+ ip address $User_VLAN_Address 255.255.255.0
+ ip helper-address $DHCP_ADDR1
+ ip helper-address $DHCP_ADDR2
+ no ip redirects
+ ip nbar protocol-discovery
+ no cdp enable
+ service-policy input INGRESS_DSCP_MARKING_POLICY
+ no shut
+!
+interface $LAN_Intf.$Wireless_VLAN_Number
+ description Wireless LAN
+ encapsulation dot1Q $Wireless_VLAN_Number
+ ip address $Wireless_VLAN_Address 255.255.255.0
+ ip helper-address $DHCP_ADDR1
+ ip helper-address $DHCP_ADDR2
+ no ip redirects
+ ip nbar protocol-discovery
+ no cdp enable
+ service-policy input INGRESS_DSCP_MARKING_POLICY
+ no shut
+!
+interface $LAN_Intf.$IPT_VLAN_Number
+ description Voice LAN
+ encapsulation dot1Q $IPT_VLAN_Number
+ ip address $IPT_VLAN_Address 255.255.255.0
+ ip helper-address $DHCP_ADDR1
+ ip helper-address $DHCP_ADDR2
+ no ip redirects
+ ip nbar protocol-discovery
+ no cdp enable
+ service-policy input INGRESS_DSCP_MARKING_POLICY
+ no shut
+#if($User2_VLAN_Number != 'NONE')interface $LAN_Intf.$User2_VLAN_Number
+ description Second User Vlan
+ encapsulation dot1Q $User2_VLAN_Number
+ ip addr $User2_VLAN_Address $User2_VLAN_Mask
+ no ip redirects
+ ip nbar protocol-discovery
+ service-policy input INGRESS_DSCP_MARKING_POLICY'
+ no shut
+ #{end}
+ #if($Customer_VLAN_Number != 'NONE')interface $LAN_Intf.$Customer_VLAN_Number
+ description Customer Engagement Vlan
+ encapsulation dot1Q $Customer_VLAN_Number
+ ip addr $Customer_VLAN_Address $Customer_VLAN_Mask
+ no ip redirects
+ ip nbar protocol-discovery
+ service-policy input INGRESS_DSCP_MARKING_POLICY'
+ no shut
+ #{end}
+!
+#{else}interface $LAN_Intf
+ description Not in Use
+ no ip address
+ shutdown
+#{end}!
+#if($Router == '01')
+#if($MPLS_Interface_Type =='Ethernet')interface $MPLS_Intf
+ no shutdown
+ no negotiation auto
+  #if($Router_Model != 'ISR4331/K9')media rj  
+  #{end}
+  duplex full
+  speed 100
+#if( ${MPLS_Intf} == '' ) interface #set($intf = $MPLS_Intf + $!{MPLS_SubIf})$intf 
+  no shutdown
+#{end}
+ service-policy output #set($policy= $MPLS_Intf + $!{MPLS_SubIf} + '_MPLS_PARENT_POLICY')$policy
+ description Verizon Business MPLS Circuit $MPLS_Circuit_ID
+ bandwidth $MPLS_Bandwidth
+ vrf forwarding $MPLS_VRF
+ ip address $MPLS_IP_Addr $MPLS_Mask
+ no negotiation auto
+ !
+#{else}interface #set($intf = $MPLS_Intf + $!{MPLS_SubIf})$intf
+ no ip address
+ desc not in use
+ shut
+#{end}#{end}
+!
+#if( ($Router == '02') or ($SPOKE == 'SINGLE') )interface $Internet_Intf
+ description  $Internet_Service $Internet_Carrier - $Carrier_Circuit_ID $Internet_ISP LEC-ID $ISP_Circuit_ID
+ bandwidth $Internet_Bandwidth
+ vrf forwarding $INET_VRF
+ ip address $Internet_IP_Addr $Internet_Mask
+ ip access-group ACL-INET-PUBLIC in
+ negotiation auto
+ service-policy output #set($out=$Internet_Intf+'_INET_PARENT_POLICY')$out
+#if ($Internet_IP_Addr == '1.1.1.1') shutdown
+#else no shutdown
+#{end}#{end}
+!
+#if($Router_Model=='ISR4331/K9')interface Service-Engine0/4/0
+!
+interface Ethernet-Internal1/0/0
+ description TRUNK TO SM-X-ES3-24-P INTERNAL MODULE
+  switchport trunk native vlan 2
+ switchport trunk allowed vlan 2,10,11
+ switchport mode trunk
+ no mop enabled
+ no mop sysid
+!
+vlan $User_VLAN_Number
+ name User_VLAN
+interface $User_VLAN_Number
+ description Regular LAN
+ ip address $User_VLAN_IP $User_VLAN_Mask
+ ip helper-address $DHCP_ADDR1
+ ip helper-address $DHCP_ADDR2
+ no ip redirects
+ ip nbar protocol-discovery
+ service-policy input INGRESS_DSCP_MARKING_POLICY
+!
+vlan $Wireless_VLAN_Number
+ name Wireless_VLAN
+interface Vlan$Wireless_VLAN_Number
+ description Wireless LAN
+ ip address $Wireless_VLAN_IP $Wireless_VLAN_Mask
+ ip helper-address 10.42.2.52
+ ip helper-address 10.32.2.52
+ no ip redirects
+ ip nbar protocol-discovery
+ service-policy input INGRESS_DSCP_MARKING_POLICY
+!
+vlan $IPT_VLAN_Number
+ name IPT_VLAN_IP
+ exit
+interface Vlan$IPT_VLAN_Number
+ description Voice LAN
+ ip address $IPT_VLAN_IP $IPT_VLAN_Mask
+ ip helper-address 10.42.2.52
+ ip helper-address 10.32.2.52
+ no ip redirects
+ ip nbar protocol-discovery
+ service-policy input INGRESS_DSCP_MARKING_POLICY
+!
+#if($Customer_VLAN_Number != '')interface Vlan $Customer_VLAN_Number
+ description Customer Engagement Vlan
+ ip addr $Customer_VLAN_Addr $Customer_VLAN_Mask
+ no ip redirects
+ ip nbar protocol-discovery
+ service-policy input INGRESS_DSCP_MARKING_POLICY
+ no shut
+#{end}#{end}
+!
+router eigrp ALLEGIS
+ !
+ address-family ipv4 unicast autonomous-system $EIGRP_AS
+  !
+  af-interface default
+   passive-interface
+  exit-af-interface
+!
+#if($Router == '01')  af-interface Tunnel100
+   summary-address $User_VLAN_Network $User_VLAN_Mask
+   summary-address $Wireless_VLAN_Network $Wireless_VLAN_Mask
+   summary-address $IPT_VLAN_Network $IPT_VLAN_Mask
+#if($User2_VLAN_Number != 'NONE')   summary-address $User2_VLAN_Network $User2_VLAN_Mask
+#{end}
+#if($Customer_VLAN_Number != 'NONE')   summary-address $Customer_VLAN_Network $Customer_VLAN_Mask
+#{end}
+   hello-interval 20
+   hold-time 60
+   no passive-interface
+   stub-site wan-interface
+  exit-af-interface
+#{end}
+!
+#if( ($Router == '02') or ($SPOKE == 'SINGLE') )  af-interface Tunnel200
+   summary-address $User_VLAN_Network $User_VLAN_Mask
+   summary-address $Wireless_VLAN_Network $Wireless_VLAN_Mask
+   summary-address $IPT_VLAN_Network $IPT_VLAN_Mask
+#if($User2_VLAN_Number != 'NONE')   summary-address $User2_VLAN_Network $User2_VLAN_Mask
+#{end}
+#if($Customer_VLAN_Number != 'NONE')   summary-address $Customer_VLAN_Network $Customer_VLAN_Mask
+#{end}
+   hello-interval 20
+   hold-time 60
+   no passive-interface
+   stub-site wan-interface
+  exit-af-interface
+#{end}
+! 
+  topology base
+   distribute-list route-map set-metrics in Tunnel200
+   distribute-list route-map set-metrics in Tunnel100
+#if($Router == '01')   distribute-list route-map BRANCH-OUT out Tunnel100
+#end
+#if( ($Router == '02') or ($SPOKE == 'SINGLE') )   distribute-list route-map BRANCH-OUT out Tunnel200
+#end
+!
+  exit-af-topology
+!
+  network $Router_Loopback 0.0.0.0
+  network $User_VLAN_WCmask
+  network $Wireless_VLAN_WCmask
+  network $IPT_VLAN_WCmask
+
+  network $Tunnel_100_WCmask
+  network $Tunnel_200_WCmask
+  eigrp router-id $Router_Loopback
+  eigrp stub-site ${EIGRP_AS}:81
+ exit-address-family
+!
+ip forward-protocol nd
+ip ftp source-interface Loopback0
+no ip http server
+no ip http secure-server
+ip tftp source-interface Loopback0
+ip route vrf $INET_VRF 0.0.0.0 0.0.0.0 $Internet_IP_GW
+ip route vrf $MPLS_VRF 0.0.0.0 0.0.0.0 $MPLS_IP_GW
+ip tacacs source-interface Loopback0
+ip ssh time-out 60
+ip ssh version 2
+ip scp server enable
+!
+!
+#if($DC== 'DC2')!
+
+ip prefix-list default-route seq 100 permit 0.0.0.0/0
+route-map set-metrics permit 100
+ description bump up $DC1 BR02 - INET to prefer Phoenix
+ match ip address prefix-list default-route
+ match tag 201
+ set metric +3999999999
+route-map set-metrics permit 200
+ description bump up $DC1 BR01 - MPLS to prefer Phoenix
+ match ip address prefix-list default-route
+ match tag 101
+ set metric +4222222222
+#{end}
+route-map set-metrics permit 300
+ description matches $DC1 BR02 - INET
+ match tag 201
+route-map set-metrics permit 400
+ description matches RP BR01 - MPLS
+ match tag 101
+ set metric +1111111111
+route-map set-metrics permit 500
+ description matches PHX BR02 - INET
+ match tag 202
+ set metric +2222222222
+route-map set-metrics permit 600
+ description matches PHX BR02 - MPLS
+ match tag 102
+ set metric +3333333333
+!
+ip access-list extended ACL-INET-PUBLIC
+ remark Only allow required ports/protocols into Public IP
+ permit udp any any eq non500-isakmp
+ permit udp any any eq isakmp
+ permit esp any any
+ permit udp any any eq bootpc
+ permit icmp any any echo
+ permit icmp any any echo-reply
+ permit icmp any any ttl-exceeded
+ permit icmp any any port-unreachable
+ permit udp any any gt 1023 ttl eq 1
+ permit tcp 216.152.96.0 0.0.15.255 any eq 22
+!
+ip access-list extended MISSION-CRITICAL-DATA
+ remark PeopleSoft applications (VIP #1)
+ permit ip 10.0.0.0 0.255.255.255 host 10.48.38.35
+ remark PeopleSoft applications (VIP #2)
+ permit ip 10.0.0.0 0.255.255.255 host 10.48.38.32
+ remark RWS application
+ permit ip 10.0.0.0 0.255.255.255 host 10.48.38.160
+ remark PeopleSoft Onboarding
+ permit ip 10.0.0.0 0.255.255.255 host 10.48.36.35
+ remark VDI
+ permit ip 10.0.0.0 0.255.255.255 host 10.48.38.15
+ permit ip 10.0.0.0 0.255.255.255 host 10.42.55.20
+ permit ip 10.0.0.0 0.255.255.255 host 10.42.55.21
+ permit ip 10.0.0.0 0.255.255.255 host 10.42.55.22
+!
+!
+ip prefix-list SPOKE_PREFIX seq 5 permit #set($lb = $Router_Loopback + '/32')$lb
+#foreach($subnet in ${User_VLAN_Pfx} )#set($seq = 100 + ($velocityCount ) )
+ip prefix-list SPOKE_PREFIX seq $seq permit $subnet
+#{end}
+#foreach($subnet in ${Wireless_VLAN_Pfx} )#set($seq = 300 + ($velocityCount ) )
+ip prefix-list SPOKE_PREFIX seq $seq permit $subnet
+#{end}
+#foreach($subnet in ${IPT_VLAN_Pfx} )#set($seq = 500 + ($velocityCount ) )
+ip prefix-list SPOKE_PREFIX seq $seq permit $subnet
+#{end}
+#if($User2_VLAN_Number != 'NONE')#foreach($subnet in ${User2_VLAN_Pfx} )#set($seq = 700 + ($velocityCount ) )
+ip prefix-list SPOKE_PREFIX seq $seq permit $subnet
+#{end}#{end}
+#if($Customer_VLAN_Number != 'NONE')#foreach($subnet in ${Customer_VLAN_Pfx} )#set($seq = 900 + ($velocityCount ) )
+ip prefix-list SPOKE_PREFIX seq $seq permit $subnet
+#{end}#{end}
+!
+#if($Router == '01')ip prefix-list TUNNEL-ROUTES seq 5 permit $Tunnel_100_Network
+#end
+#if( ($Router == '02') or ($SPOKE == 'SINGLE') )ip prefix-list TUNNEL-ROUTES seq 10 permit $Tunnel_200_Network
+#end
+ip prefix-list TUNNEL-ROUTES seq 15 permit 0.0.0.0/0
+!
+no service-routing capabilities-manager
+!
+logging trap debugging
+logging facility syslog
+logging source-interface Loopback0 
+#if($LOGHOST1)logging host $LOGHOST1
+#{end}
+#if($LOGHOST2)logging host $LOGHOST2
+#{end}
+#if($LOGHOST3)logging host $LOGHOST3
+#{end}
+#if($LOGHOST4)logging host $LOGHOST4
+#{end}
+#if($LOGHOST5)logging host $LOGHOST5
+#{end}
+#if($LOGHOST6)logging host $LOGHOST6
+#{end}
+!
+access-list 9 permit any log
+!
+route-map BRANCH-OUT deny 20
+ match ip address prefix-list TUNNEL-ROUTES
+!
+route-map BRANCH-OUT permit 1000
+!
+snmp-server user $LA_USER GR_SNMPv3 v3 auth sha $LA_PSWD
+snmp-server user $SNMP_USER GR_SNMPv3 v3 auth sha $SNMP_PSWD
+snmp-server group GR_SNMPv3 v3 auth read SNMPv3_Read write SNMPv3_Write access 9
+! 
+snmp-server view SNMPv3_Read iso included
+snmp-server view SNMPv3_Write iso included
+snmp-server trap-source Loopback0
+snmp-server packetsize 1372
+snmp-server tftp-server-list 9
+snmp-server location Assettag $SerialNo
+snmp ifmib ifindex persist
+snmp mib nhrp
+snmp-server enable traps snmp authentication linkdown linkup coldstart warmstart
+snmp-server enable traps pfr
+snmp-server enable traps eigrp
+snmp-server enable traps license
+snmp-server enable traps config-copy
+snmp-server enable traps config
+snmp-server enable traps config-ctid
+snmp-server enable traps entity
+snmp-server enable traps frame-relay multilink bundle-mismatch
+snmp-server enable traps frame-relay
+snmp-server enable traps frame-relay subif
+snmp-server enable traps cpu threshold
+snmp-server enable traps pki
+snmp-server enable traps bgp
+snmp-server enable traps nhrp nhs
+snmp-server enable traps nhrp nhc
+snmp-server enable traps nhrp nhp
+snmp-server enable traps nhrp quota-exceeded
+snmp-server enable traps voice
+snmp-server host $SNMP_ADDR1 version 3 auth $SNMP_USER
+#if($SNMP_ADDR2)snmp-server host $SNMP_ADDR2 version 3 auth $SNMP_USER
+#{end}
+#if($SNMP_ADDR3)snmp-server host $SNMP_ADDR3 version 3 auth $SNMP_USER
+#{end}
+#if($SNMP_ADDR4)snmp-server host $SNMP_ADDR4 version 3 auth $SNMP_USER
+#{end}
+snmp-server file-transfer access-group 9 protocol tftp
+snmp-server file-transfer access-group 9 protocol scp
+!
+tacacs server $TAC_HOST1
+ address ipv4 $TAC_ADDR1
+ key 7 $TAC_KEY71
+tacacs server $TAC_HOST2
+ address ipv4 $TAC_ADDR2
+ key 7 $TAC_KEY72
+!
+banner login @
+    ***********************************************************
+    *                                                         *
+    *     Property of Allegis Group. Unauthorized use         *
+    *         may result in Criminal Prosecution              *
+    *                                                         *
+    *     Allegis Group's Information Services products,      *
+    *    including: network, E-mail, voicemail, telephone,    *
+    *       Internet services, and computers, are to be       *
+    *       used for Company business only and are not        *
+    *        intended for personal use. Allegis Group         *
+    *      reserves the right to monitor and access all       *
+    *        information systems at any time with or          *
+    *        without an employee's advance notice or          *
+    *     consent.  Such access may occur before, during,     *
+    *    or after working hours, and may be performed by      *
+    *        any supervisor, manager, or personnel            *
+    *                designated by the Company.               *
+    *                                                         *
+    ***********************************************************
+@
+!
+line con 0
+ password 7 $CONPW7
+ logging synchronous
+ stopbits 1
+line aux 0
+ modem InOut
+ no exec
+ transport input all
+ stopbits 1
+line vty 0 4
+ access-class 9 in vrf-also
+ exec-timeout 20 0
+ logging synchronous
+ transport input ssh
+line vty 5 15
+ access-class 9 in vrf-also
+ exec-timeout 20 0
+ logging synchronous
+ transport input ssh
+!
+ntp server $NTP1 prefer
+#if($NTP2)ntp server $NTP2#end
+#if($NTP3)ntp server $NTP3#end
+#if($NTP4)ntp server $NTP4#end
+
+
+

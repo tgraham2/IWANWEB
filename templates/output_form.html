@@ -1,0 +1,16 @@
+$def with (site,prj,r,s)
+
+<h1>File actions for $site</h1>
+<form method='POST' action='/output' >
+<table>
+<tr><td><button type='submit' name='choice' value="vars">Download VARS file</button></td></tr>
+<tr><td><button type='submit' name='choice' value="cfg">Download configuration file $r[0]</button></td></tr>
+$if len(r) > 1:
+	<tr><td><button type='submit' name='choice' value="cfg2">Download configuration file #2 $r[1]</button>
+$if len(s) > 0:
+	<tr><td><button type='submit' name='choice' value="swcfg">Download switch configuration file $s[0]</button>
+</td></tr><tr><td><button type='submit' name='choice' value="ae-vars">Upload vars file to APIC-EM ($prj[1])</button></td></tr>
+<tr><td><button type='submit' name='choice' value="ae-cfg">Upload configuration file to APIC-EM ($prj[1])</button></td></tr>
+<tr><td><button type="button" onclick="location.href='/'">CANCEL/START OVER</button></td></tr>
+<table>
+</form>

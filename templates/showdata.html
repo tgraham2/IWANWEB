@@ -1,0 +1,23 @@
+$def with (site,label,action,back,values,keys=[])
+
+$code:
+	if keys==[]:
+		order=values
+	else:
+		order=keys
+
+<h1>Show $label values for $site</h1>
+	<td><button type="button" onclick="location.href='$action'">CONTINUE</button></td>	
+	<td><button type="button" onclick="location.href='$back'">GO BACK</button></td>
+	<td><button type="button" onclick="location.href='/'">CANCEL/START OVER</button></td>
+    <table>
+        $for key in order:
+            <tr>
+                <td>$values[key][0]</td>
+                <td class=value >$values[key][1]</td>
+				<td>$values[key][2]</td>
+				<td>($key)</td>
+            </tr>
+    </table>
+	<td><button type="button" onclick="location.href='$action'">CONTINUE</button></td>
+	<td><button type="button" onclick="location.href='/'">CANCEL/START OVER</button></td>

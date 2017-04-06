@@ -1,0 +1,11 @@
+Internet_Interface	Internet Interface	GigabitEthernet0/0/2	Physical Interface for Internet
+Internet_Service	Internet Service	5MB EOF	Level of service provided
+Internet_Bandwidth	Internet Upload Speed	5000	Bandwidth (Upload)
+Internet_BW_Down	Internet Download	5000	Bandwidth (Download)
+Internet_Carrier	Internet Carrier	MetTel	Name of Internet Carrier
+Carrier_Circuit_ID	Carrier Circuit ID	<XX.XXXX.XXXXX>	Internet Carrier Circuit ID
+Internet_ISP	Internet ISP	<ISP>	Internet Service Provider
+ISP_Circuit_ID	ISP Circuit ID	<ISP-Circuit>	ISP Circuit Identifier
+Internet_IP_Addr	Internet IP Address	1.1.1.1	IP Address of Internet Connection
+Internet_IP_GW	Internet IP Gateway	1.1.1.2	Gateway for Internet Traffic
+Internet_Mask	Internet Mask	255.255.255.252	Gateway for Internet Traffic

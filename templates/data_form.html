@@ -1,0 +1,25 @@
+$def with (site,label,action,values,keys=[])
+ 
+$code:
+	if keys==[]:
+		order=values
+	else:
+		order=keys
+
+<h1>Edit $label values for $site</h1>
+<form action=$action method="POST">
+	<input type="submit" value="Continue">
+    <table>
+        $for key in order:
+            <tr>
+                <td>$values[key][0]</td>
+				$if values[key][1] == '<no_default>':
+					<td><input class=redbox type="text" name=$key value='$values[key][1]'></td>
+				$else:
+					<td><input class=blubox type="text" name=$key value='$values[key][1]'></td>
+				<td>$values[key][2]</td>
+				<td>($key)</td>
+            </tr>
+    </table>
+	<input type="submit" value="Continue">
+</form>
