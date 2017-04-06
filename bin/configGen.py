@@ -62,7 +62,7 @@ def get_varFile(desc,fid):
 def rtrConfig(varfile,region):
     from splitpfx import splitpfx
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
-    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','usr').replace('\\','/')
+    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
     # initialize dictionary
     global var_dict
     var_dict = {}
@@ -215,7 +215,7 @@ def rtrConfig(varfile,region):
     #
 def swConfig(varfile,region):
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
-    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','usr').replace('\\','/')
+    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
     ipUser=IPNetwork( '%s/%s' % (var_dict['User_VLAN_Network'], var_dict['User_VLAN_Mask']))
     # get switch mgmt address (.3) the standard is to use the .3 of the user network
     var_dict['Switch_Address'] = str(IPAddress(int(ipUser.network)+3))
