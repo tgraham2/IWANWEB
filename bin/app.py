@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# EMEA version
+# "Regions" version
 # enable debugging
 import cgitb
 cgitb.enable()
