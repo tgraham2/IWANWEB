@@ -7,7 +7,7 @@ import os
 realPath = os.path.dirname(__file__)
 tmplPath = realPath.replace('\\','/').replace('bin','templates')
 sessPath = realPath.replace('\\','/').replace('bin','sessions')
-usrData = realPath.replace('\\','/').replace('bin','usr')
+usrData = realPath.replace('\\','/').replace('bin','user')
 global dataPath
 import sys
 print('PY:',sys.version.split()[0])
