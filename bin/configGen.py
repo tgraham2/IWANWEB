@@ -19,7 +19,7 @@ import os
 # make changing templates easy
 rt_template_4351='var_template-iwan-isr'
 rt_template_4331='var_template-iwan-isr'
-sw_template='var_template-ss-switch-emea'
+sw_template='var_template-ss-switch'
 #
 
 # want to print extra stuff on the screen?
@@ -61,8 +61,9 @@ def get_varFile(desc,fid):
     
 def rtrConfig(varfile,region):
     from splitpfx import splitpfx
-    dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
+    dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region.lower()
     usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
+    print('rtrC',dataPath,usrData)
     # initialize dictionary
     global var_dict
     var_dict = {}

@@ -335,9 +335,9 @@ class WRITE:
                 fv.write('%s\t%s\n' % ('City',x_dict['City'][1] ) )
             # generate configuration
             if x_dict['Router_Gen'][1] == 'T':
-                rtrCnfFile = rtrConfig(varFile,x_dict['Region'][1]) # gen_config returns list of config file names
+                rtrCnfFile = rtrConfig(varFile,x_dict['Region'][1].lower()) # gen_config returns list of config file names
             if x_dict['Switch_Gen'][1] == 'T':
-                swCnfFile = swConfig(varFile,x_dict['Region'][1]) # gen_config returns list of config file names
+                swCnfFile = swConfig(varFile,x_dict['Region'][1].lower()) # gen_config returns list of config file names
             print ("R:",rtrCnfFile,)
             print ("S:",swCnfFile)
         return render.output_form(nodeName,x_dict['AE_Project'],rtrCnfFile,swCnfFile)
