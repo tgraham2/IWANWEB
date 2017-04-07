@@ -8,4 +8,4 @@ MPLS_IP_Addr	MPLS IP Address	<no default>	Local IP address of MPLS Network
 MPLS_Mask	MPLS Mask	255.255.255.252	Network Mask
 #	#		
 MPLS_Interface	MPLS Interface	GigabitEthernet0/0/1	Physical Interface of MPLS Connection
-MPLS_SubIntf	MPLS SubInterface	NONE	Subinterface (leave as 'NONE' if not applicable.
+MPLS_Subinterface	MPLS SubInterface		Subinterface (leave as empty if not applicable.

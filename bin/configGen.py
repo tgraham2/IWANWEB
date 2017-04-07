@@ -55,13 +55,15 @@ def get_varFile(desc,fid):
             # eliminate spaces in parms
             var_dict[parms[0]]=parms[1].replace(" ",'_')
         except:
-            print ('getvarfile/error:',desc,parms)
+            var_dict[parms[0]]=None
+            print ('getvar/error',parms[0])
             continue
     finput.close()
     
 def rtrConfig(varfile,region):
     from splitpfx import splitpfx
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region.lower()
+    tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
     print('rtrC',dataPath,usrData)
     # initialize dictionary
@@ -84,12 +86,12 @@ def rtrConfig(varfile,region):
     #
     # pick router template based on model
     # mask overrides value in site var file!!!
-    if (var_dict['Router_Model']=='4331'):
-        tmpl_file = '%s/%s' % (dataPath,rt_template_4331)
+    if (var_dict['Router_Model']=='ISR4331/K9'):
+        tmpl_file = '%s/%s' % (tmplPath,rt_template_4331)
 
 
     else:
-        tmpl_file = '%s/%s' % (dataPath,rt_template_4351)
+        tmpl_file = '%s/%s' % (tmplPath,rt_template_4351)
 
     ipUser=IPNetwork( '%s/%s' % (var_dict['User_VLAN_Network'],var_dict['User_VLAN_Mask']))
     ipWireless=IPNetwork(var_dict['Wireless_VLAN_Network']+'/'+var_dict['Wireless_VLAN_Mask'])
@@ -115,7 +117,7 @@ def rtrConfig(varfile,region):
     var_dict['IPT_VLAN_Address']=str(IPAddress(int(ipIPT.network)+1))
     var_dict['IPT_VLAN_Pfx']=splitpfx(ipIPT)
     #
-    if var_dict['User2_VLAN_Number'] != 'NONE':
+    if var_dict['User2_VLAN_Number'] != None:
         print ('adding User2 Network',var_dict['User2_VLAN_Number'])
         ipUser2=IPNetwork(var_dict['User2_VLAN_Network']+'/'+var_dict['User2_VLAN_Mask'])
         var_dict['User2_VLAN_Network']=ipUser2.network
@@ -123,7 +125,17 @@ def rtrConfig(varfile,region):
         var_dict['User2_VLAN_WCmask']=str(ipUser2.network) +' '+ str(ipUser2.hostmask)
         var_dict['User2_VLAN_Address']=str(IPAddress(int(ipUser2.network)+1))
         var_dict['User2_VLAN_Pfx']=splitpfx(ipUser2)
-    if var_dict['Customer_VLAN_Number'] != 'NONE':
+
+    if var_dict['User3_VLAN_Number'] != None:
+        print ('adding User3 Network',var_dict['User3_VLAN_Number'])
+        ipUser3=IPNetwork(var_dict['User3_VLAN_Network']+'/'+var_dict['User3_VLAN_Mask'])
+        var_dict['User3_VLAN_Network']=ipUser3.network
+        var_dict['User3_VLAN_CIDR']=ipUser3.cidr
+        var_dict['User3_VLAN_WCmask']=str(ipUser3.network) +' '+ str(ipUser3.hostmask)
+        var_dict['User3_VLAN_Address']=str(IPAddress(int(ipUser3.network)+1))
+        var_dict['User3_VLAN_Pfx']=splitpfx(ipUser3)
+   
+    if var_dict['Customer_VLAN_Number'] != None:
         print ('adding Customer Network',var_dict['Customer_VLAN_Number'])
         ipCustomer=IPNetwork(var_dict['Customer_VLAN_Network']+'/'+var_dict['Customer_VLAN_Mask'])
         var_dict['Customer_VLAN_Network']=ipCustomer.network
@@ -147,13 +159,10 @@ def rtrConfig(varfile,region):
         var_dict['MPLS_Interface']='Unsupported'
         print ('* ERROR * MPLS interface not understood or program error')
     #
-    # Have to code for speeds in .5 Mbps increments :-(
-    if(var_dict['MPLS_Bandwidth']=='4500'):
-        var_dict['MPLS_Speed']='4.5MBPS'
-    elif(var_dict['MPLS_Bandwidth']=='1500'):
-        var_dict['MPLS_Speed']='1.5MBPS'
+    if  int(int(var_dict['MPLS_Bandwidth'])/1000.) * 1000 != int(var_dict['MPLS_Bandwidth']):
+        var_dict['MPLS_Speed']=str(int(var_dict['MPLS_Bandwidth'])/1000.)+'MBPS'
     else:
-        var_dict['MPLS_Speed']=str(int (int(var_dict['MPLS_Bandwidth'])/1000.) )+'MBPS'
+        var_dict['MPLS_Speed']=str(int(var_dict['MPLS_Bandwidth'])/1000.)[:-2]+'MBPS'
     # Handle Tunnel Addresses
     ipTun100=IPNetwork(var_dict['Tunnel_100_Address']+'/'+var_dict['Tunnel_100_Mask'])
     ipTun200=IPNetwork(var_dict['Tunnel_200_Address']+'/'+var_dict['Tunnel_200_Mask'])
@@ -165,7 +174,10 @@ def rtrConfig(varfile,region):
     #
     if var_dict['Internet_BW_Down']=='':
         var_dict['Internet_BW_Down']=var_dict['Internet_Bandwidth']
-    var_dict['Internet_Speed_Down']=str(int(var_dict['Internet_BW_Down' ])/1000)+'MBPS'
+    if  int(int(var_dict['Internet_BW_Down'])/1000.) * 1000 != int(var_dict['Internet_BW_Down']):
+        var_dict['Internet_Speed_Down']=str(int(var_dict['Internet_BW_Down'])/1000.)+'MBPS'
+    else:
+        var_dict['Internet_Speed_Down']=str(int(var_dict['Internet_BW_Down'])/1000.)[:-2]+'MBPS'
     #
     # x_BW is bandwidth in bps; x_Bandwidth is in Kbps
     var_dict['MPLS_BW']=var_dict['MPLS_Bandwidth']+'000'
@@ -180,6 +192,7 @@ def rtrConfig(varfile,region):
             break
     var_dict['Router']='01'
     nodeName = "%s_%s%s" %( var_dict['City'], "00000"[:5-len(var_dict['SiteNo'])],var_dict['SiteNo'])
+    var_dict['Hostname'] = '%sR%s' % (nodeName,var_dict['Router'])
     configName = '%s-R%s-cfg' % (nodeName,var_dict['Router'])
     config_output=open('%s/%s' % (usrData,configName) ,'w')
     rtrConfig=[configName]
@@ -194,6 +207,7 @@ def rtrConfig(varfile,region):
     # create a 2nd config for DUAL router spoke site
     if (var_dict['SPOKE'] == 'DUAL'):
         var_dict['Router']='02'
+        var_dict['Hostname'] = '%sR%s' % (nodeName,var_dict['Router'])
         configName = '%s-R%s-cfg' % (nodeName,var_dict['Router'])
         config_output=open('%s/%s' % (usrData,configName) ,'w')
         rtrConfig.append(configName)
@@ -215,6 +229,7 @@ def rtrConfig(varfile,region):
     return rtrConfig
     #
 def swConfig(varfile,region):
+    tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
     usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
     ipUser=IPNetwork( '%s/%s' % (var_dict['User_VLAN_Network'], var_dict['User_VLAN_Mask']))
@@ -237,17 +252,17 @@ def swConfig(varfile,region):
     sw_output=open('%s/%s' % (usrData,swConfigName),'w')
     swConfig = [swConfigName]
     sw_output.write('! SW Configuration generated: '+time.strftime("%Y-%m-%d %H:%M:%S")+'\n')
-    #template=airspeed.Template( file('%s/%s' % (dataPath,sw_template) ).read() )
-    with open('%s/%s' % (dataPath,sw_template) ) as tmpl:
+    #template=airspeed.Template( file('%s/%s' % (tmplPath,sw_template) ).read() )
+    with open('%s/%s' % (tmplPath,sw_template) ) as tmpl:
             template=airspeed.Template( tmpl.read() )
     sw_output.write(template.merge(var_dict))
     sw_output.close()
     return swConfig
 
 print (" type 'show()' to see the dictionary ")
-def gen_config(vf):
-    rtrConfig(vf,'na')
-    swConfig (vf,'na')
+def gen_config(vf,reg):
+    rtrConfig(vf,reg)
+    swConfig (vf,reg)
 if __name__ == '__main__':
-    SiteNo=raw_input('site:').strip()
-    gen_config ('%s-vars' % (SiteNo) )
+    s,r=input('site/region:').split(',')
+    gen_config ('%s-vars' % s , r )

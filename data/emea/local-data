@@ -10,7 +10,7 @@ Wireless_VLAN_Mask	Wireless VLAN Mask	255.255.255.0	Mask for Wireless
 IPT_VLAN_Number	IPT VLAN Number	182	VLAN ID for IP Telephony
 IPT_VLAN_Network	IPT VLAN Network	10.182.xx.0	value must be a network consistent with the mask
 IPT_VLAN_Mask	IPT VLAN Mask	255.255.255.0	Mask for IPT Network
-Customer_VLAN_Number	Customer VLAN Number	NONE	VLAN number for customer VLAN; put 'NONE' if there is none
+Customer_VLAN_Number	Customer VLAN Number		VLAN number for customer VLAN; put 'NONE' if there is none
 Customer_VLAN_Network	Customer VLAN Network	NONE	Value must be a network
 Customer_VLAN_Mask	Customer VLAN Mask	NONE	Mask for customer network
 Tunnel_100_Address	Tunnel 100 Address	255.255.255.0	Tunnel Address for MPLS IWAN Tunnel
@@ -22,6 +22,6 @@ Router_Loopback2	2nd Router Loopback	10.180.254.yy	Unique Loopback /32 for 2nd R
 Switch_Gen	Switch Gen	T	Generate configuration for Switch stack? (T/F)
 Switch_Stack_Size	Switch Stack Size	1	Number of switches in the stack
 TenG_Switch	TenG Switch	F	set to T for one of those Ten Gig model 3650 switch
-User2_VLAN_Number	User2 VLAN Number	NONE	VLAN ID for User2/Data Network
+User2_VLAN_Number	User2 VLAN Number		VLAN ID for User2/Data Network
 User2_VLAN_Network	User2 VLAN Network	NONE	Network address for User2/Data
 User2_VLAN_Mask	User2 VLAN Mask	255.255.255.0	Mask for User2/Data

@@ -44,4 +44,7 @@ Customer_VLAN_Mask	255.255.255.0
 #
 User2_VLAN_Number	NONE
 User2_VLAN_Mask	255.255.255.0
+#
+User3_VLAN_Number	NONE
+User3_VLAN_Mask	255.255.255.0
 END	END

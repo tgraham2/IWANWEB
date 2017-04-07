@@ -1,7 +1,6 @@
-#if( $MPLS_SubIf )#set( $MPLS_SubIf = '.' + $MPLS_SubIf )
-#else#set( $MPLS_SubIf = '')
-#end
-
+#if( $MPLS_Subinterface )#set( $MPLS_Subinterface = '.' + $MPLS_Subinterface )
+#else#set( $MPLS_Subinterface = '')
+#{end}! Region $Region 
 service password-encryption
 !
 hostname $Hostname
@@ -137,6 +136,9 @@ redundancy
 #{end}
 crypto ikev2 dpd 40 5 on-demand
 !
+#if($MPLS_Interface_Type != 'Ethernet')#if($Region == 'NA')card type t1 0 1
+#{else}card type e1 0 1
+#{end}#{end}
 #if($Router == '01')
 #if($MPLS_Interface_Type == 'mppp')
 #foreach($j in [1..${iMPLS_Interface_Number_of_Links}])
@@ -196,19 +198,19 @@ policy-map WAN_CHILD_POLICY
  class CALL-SIGNALING
   bandwidth remaining percent 6 
   set dscp af41
- class STREAMING-VIDEO
-  bandwidth remaining percent 12 
-  random-detect dscp-based
-  set dscp af21
- class NET-CTRL-MGMT
-  bandwidth remaining percent 5 
-  set dscp cs6
- class SCAVENGER
-  bandwidth remaining percent 1 
-  set dscp af11
  class EGRESS-CRITICAL-DATA
   bandwidth remaining percent 35 
   set dscp af31
+ class STREAMING-VIDEO
+  set dscp af21
+  bandwidth remaining percent 12 
+  random-detect dscp-based
+ class NET-CTRL-MGMT
+  set dscp cs6
+  bandwidth remaining percent 5 
+ class SCAVENGER
+  bandwidth remaining percent 1 
+  set dscp af11
  class class-default
   bandwidth remaining percent 4 
   random-detect
@@ -329,7 +331,7 @@ interface Serial0/1/3:0.$FRAME_DLCI point-to-point
  if-state nhrp
  tunnel source #if($MPLS_Interface_Type == 'mppp')#set($tunnel_source = 'Multilink123')
 #elseif($MPLS_Interface_Type == 'frame')#set($tunnel_source='Se0/1/3:0'+'.'+$FRAME_DLCI)
-#else#set( $tunnel_source = $MPLS_Intf + $!{MPLS_SubIf} )#{end}$tunnel_source
+#else#set( $tunnel_source = $MPLS_Intf + $!{MPLS_Subinterface} )#{end}$tunnel_source
  tunnel mode gre multipoint
  tunnel key 100
  tunnel vrf $MPLS_VRF
@@ -484,17 +486,17 @@ interface $LAN_Intf.$IPT_VLAN_Number
 #{end}
  duplex full
  speed 100
-#if(${MPLS_SubIf}) interface #set($intf = $MPLS_Intf + $!{MPLS_SubIf})$intf 
+#if(${MPLS_Subinterface}) interface #set($intf = $MPLS_Intf + $!{MPLS_Subinterface})$intf 
  no shutdown
 #{end}
- service-policy output #set($policy= $MPLS_Intf + $!{MPLS_SubIf} + '_MPLS_PARENT_POLICY')$policy
+ service-policy output #set($policy= $MPLS_Intf + $!{MPLS_Subinterface} + '_MPLS_PARENT_POLICY')$policy
  description Verizon Business MPLS Circuit $MPLS_Circuit_ID
  bandwidth $MPLS_Bandwidth
  vrf forwarding $MPLS_VRF
  ip address $MPLS_IP_Addr $MPLS_Mask
  no negotiation auto
  !
-#{else}interface #set($intf = $MPLS_Intf + $!{MPLS_SubIf})$intf
+#{else}interface #set($intf = $MPLS_Intf + $!{MPLS_Subinterface})$intf
  no ip address
  desc not in use
  shut
@@ -705,15 +707,15 @@ route-map set-metrics permit 300
  description matches $DC1 BR02 - INET
  match tag 201
 route-map set-metrics permit 400
- description matches RP BR01 - MPLS
+ description matches $DC1 BR01 - MPLS
  match tag 101
  set metric +1111111111
 route-map set-metrics permit 500
- description matches PHX BR02 - INET
+ description matches $DC2 BR02 - INET
  match tag 202
  set metric +2222222222
 route-map set-metrics permit 600
- description matches PHX BR02 - MPLS
+ description matches $DC2 BR02 - MPLS
  match tag 102
  set metric +3333333333
 !
@@ -853,7 +855,7 @@ snmp-server view SNMPv3_Write iso included
 snmp-server trap-source Loopback0
 snmp-server packetsize 1372
 snmp-server tftp-server-list 9
-snmp-server location Assettag $Router_SN
+snmp-server location Assettag $City $Region
 snmp ifmib ifindex persist
 snmp mib nhrp
 snmp-server enable traps snmp authentication linkdown linkup coldstart warmstart
