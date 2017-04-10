@@ -332,7 +332,7 @@ class WRITE:
             with open('%s/%s' % (usrData,varFile) , 'w') as fv:
                 for key in x_keys:
                     fv.write('%s\t%s\n' % (key,x_dict[key][1] ) )
-                fv.write('%s\t%s\n' % ('City',x_dict['City'][1] ) )
+                #fv.write('%s\t%s\n' % ('City',x_dict['City'][1] ) )
             # generate configuration
             if x_dict['Router_Gen'][1] == 'T':
                 rtrCnfFile = rtrConfig(varFile,x_dict['Region'][1].lower()) # gen_config returns list of config file names

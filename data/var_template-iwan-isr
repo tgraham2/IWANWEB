@@ -136,21 +136,23 @@ redundancy
 #{end}
 crypto ikev2 dpd 40 5 on-demand
 !
-#if($MPLS_Interface_Type != 'Ethernet')#if($Region == 'NA')card type t1 0 1
-#{else}card type e1 0 1
-#{end}#{end}
+#if($Region == 'NA')#set($Controller = 'T1')
+#{else}#set($Controller = 'E1')
+#{end}
+#if($MPLS_Interface_Type != 'Ethernet')#card type $Controller 0 1
+#{end}
 #if($Router == '01')
 #if($MPLS_Interface_Type == 'mppp')
 #foreach($j in [1..${iMPLS_Interface_Number_of_Links}])
-#if($j == 1)controller T1 0/1/3
-#elseif($j == 2)controller T1 0/1/2
-#elseif($j == 3)controller T1 0/1/1
+#if($j == 1)controller $Controller 0/1/3
+#elseif($j == 2)controller $Controller 0/1/2
+#elseif($j == 3)controller $Controller 0/1/1
 #{end} framing esf
  linecode b8zs
  cablelength long 0db
  channel-group 0 timeslots 1-24
 #end#end
-#if($MPLS_Interface_Type == 'frame')controller T1 0/1/3
+#if($MPLS_Interface_Type == 'frame')controller $Controller 0/1/3
  framing esf
  linecode b8zs
  cablelength long 0db
