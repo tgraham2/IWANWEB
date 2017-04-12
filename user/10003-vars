@@ -1,0 +1,35 @@
+#MPLS Ethernet/Dual
+City	TEST
+SiteNo	10003
+Router_SN	FTX12345678
+Router_Model	4351
+Router_Loopback	10.180.254.24
+User_VLAN_Number	180
+User_VLAN_Network	10.180.24.1
+Wireless_VLAN_Number	10
+Wireless_VLAN_Network	10.180.25.1
+IPT_VLAN_Number	182
+IPT_VLAN_Network	10.182.24.1
+MPLS_Interface_Type	Ethernet
+MPLS_Subinterface	26
+MPLS_Bandwidth	10000
+MPLS_Circuit_ID	Allegis-Group; Site-Circuit: birmingham-west-midlands-gbr_c1034118-105073328-5728996
+MPLS_IP_GW	206.114.70.77
+MPLS_IP_Addr	206.114.70.78
+Internet_Service	DIA
+Internet_Bandwidth	10000
+Internet_BW_Down	10000
+Internet_Carrier	MetTel
+Carrier_Circuit_ID	10.RBBU.100668
+Internet_ISP	** TBD **
+ISP_Circuit_ID	ORD-01624038.1
+Internet_IP_GW	185.62.118.129
+Internet_Mask	255.255.255.248	
+Internet_IP_Addr	185.62.118.130
+Router_Model	4351
+Tunnel_100_Address	10.244.124.24
+Tunnel_100_Mask	255.255.252.0
+Tunnel_200_Address	10.244.132.24
+Tunnel_200_Mask	255.255.252.0
+AAA	radius
+SPOKE	DUAL
