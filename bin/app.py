@@ -46,7 +46,7 @@ app = web.application(urls, globals())
 application = app.wsgifunc()
 
 web.config.debug = True
-
+"""
 global session
 if web.config.get('_session') is None:
     store = web.session.DiskStore(sessPath)
@@ -55,7 +55,7 @@ if web.config.get('_session') is None:
     web.config._session = session
 else:
     session = web.config._session
-    
+"""    
 render = web.template.render(tmplPath,base='base') # template directory
 global site_data, site_keys 
 site_data = {
@@ -174,7 +174,10 @@ class Site:
             # [ label, value, description]
             sdict[element]=[site_data[element][0],f[element],site_data[element][1]]
             #print element,sdict[element]
-        if (sdict['SiteKey'] != None) and (sdict['Region'][1]!='EMEA'):
+        print ('site key:',sdict['SiteKey'][1], sdict['SiteKey'][1] == None, sdict['SiteKey'][1] == '' )
+        if sdict['SiteKey'][1] == '':
+            sdict['SiteKey'][1] = None
+        if (sdict['SiteKey'][1] != None) and (sdict['Region'][1]!='EMEA'):
             print ("Warning: Changing Region to EMEA")
             sdict['Region'][1]='EMEA'
         nodeName = "%s_%s%s" %( sdict['City'][1], "00000"[:5-len(sdict['SiteNo'][1])],sdict['SiteNo'][1])
