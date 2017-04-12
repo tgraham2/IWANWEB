@@ -1,4 +1,4 @@
-#MPLS Ethernet
+#MPLS Ethernet/Dual
 City	TEST
 SiteNo	10000
 Router_SN	FTX12345678
@@ -32,5 +32,3 @@ Tunnel_100_Mask	255.255.252.0
 Tunnel_200_Address	10.244.132.24
 Tunnel_200_Mask	255.255.252.0
 AAA	radius
-DC	DC1
-Switch_Gen	T

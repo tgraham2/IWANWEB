@@ -1,0 +1,36 @@
+# 00426 Winchester (NA)
+State	VIRGINIA
+City	TEST
+Router_SN	FTX1115A32D
+SiteNo	00000
+MPLS_Bandwidth	6000
+MPLS_Circuit_ID	winchester-va_w0s87100-8580714
+MPLS_IP_Remote	152.183.127.177
+MPLS_IP_Local	152.183.127.178
+MPLS_Mask	255.255.255.252
+MPLS_Interface_Type	Ethernet
+MPLS_Interface_Number_of_Links	
+PPP_HOSTNAME	
+FRAME_DLCI	
+Internet_Service	D150.0M/U20.0M
+Internet_Bandwidth	20000
+Internet_Carrier	MetTel
+Carrier_Circuit_ID	18.NBCB.104369
+Internet_ISP	Comcast 
+ISP_Circuit_ID	1.62679E+11
+Internet_IP_Remote	50.242.38.246
+Internet_IP_Local	50.242.38.245
+Internet_Mask	255.255.255.252
+Router_Loopback	10.81.0.50
+Router_Model	4351
+Tunnel_100_Address	10.246.124.15
+Tunnel_100_Mask	255.255.252.0
+Tunnel_200_Address	10.246.132.15
+Tunnel_200_Mask	255.255.252.0
+Switch_Stack_Size	1
+User_VLAN_Number	2
+User_VLAN_Network	10.108.1.0
+Wireless_VLAN_Number	10
+Wireless_VLAN_Network	10.108.2.0
+IPT_VLAN_Number	11
+IPT_VLAN_Network	10.251.234.0

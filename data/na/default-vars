@@ -39,12 +39,12 @@ Switch_Stack_Size	0
 Tunnel_100_Mask	255.255.252.0
 Tunnel_200_Mask	255.255.252.0
 #
-Customer_VLAN_Number	NONE
+Customer_VLAN_Number	
 Customer_VLAN_Mask	255.255.255.0
 #
-User2_VLAN_Number	NONE
+User2_VLAN_Number	
 User2_VLAN_Mask	255.255.255.0
 #
-User3_VLAN_Number	NONE
+User3_VLAN_Number	
 User3_VLAN_Mask	255.255.255.0
 END	END

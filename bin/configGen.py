@@ -80,9 +80,10 @@ def rtrConfig(varfile,region):
     get_varFile('site','%s/%s' % (usrData,varfile) )
     #
     # convert to integer for range operator
-    if 'MPLS_Interface_Number_of_Links' in var_dict:
-        var_dict['iMPLS_Interface_Number_of_Links'] = \
-        int(var_dict['MPLS_Interface_Number_of_Links'])
+    try:
+        var_dict['iMPLS_Interface_Number_of_Links'] = int(var_dict['MPLS_Interface_Number_of_Links'])
+    except:
+        pass
     #
     # pick router template based on model
     # mask overrides value in site var file!!!
