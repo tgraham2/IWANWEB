@@ -23,6 +23,7 @@ User_VLAN_Mask	255.255.255.0
 Wireless_VLAN_Mask	255.255.255.0
 IPT_VLAN_Mask	255.255.255.0
 SPOKE	SINGLE
+ESM	N
 #
 Internet_Intf	GigabitEthernet0/0/2
 Internet_BW_Down	5000	

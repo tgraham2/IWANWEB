@@ -1,4 +1,4 @@
-#if( $MPLS_Subinterface )#set( $MPLS_Subinterface = '.' + $MPLS_Subinterface )
+#if( $MPLS_Subinterface )#set ($MPLS_Subif = $MPLS_Subinterface)#set( $MPLS_Subinterface = '.' + $MPLS_Subinterface )
 #else#set( $MPLS_Subinterface = '')
 #{end}! Region $Region 
 service password-encryption
@@ -481,7 +481,7 @@ interface $LAN_Intf.$IPT_VLAN_Number
  shutdown
 #{end}!
 #if($Router == '01')
-#if($MPLS_Interface_Type =='Ethernet')interface $MPLS_Intf
+#if($MPLS_Interface_Type =='Ethernet')interface $MPLS_Interface
  no shutdown
  no negotiation auto
 #if( ($Router_Model != 'ISR4331/K9') && ($MPLS_Intf == "GigabitEthernet0/0/1") ) media rj
@@ -489,9 +489,10 @@ interface $LAN_Intf.$IPT_VLAN_Number
  duplex full
  speed 100
 #if(${MPLS_Subinterface}) interface #set($intf = $MPLS_Intf + $!{MPLS_Subinterface})$intf 
+ encap dot1q $MPLS_Subif
  no shutdown
 #{end}
- service-policy output #set($policy= $MPLS_Intf + $!{MPLS_Subinterface} + '_MPLS_PARENT_POLICY')$policy
+ service-policy output #set($policy= $MPLS_Interface + '_MPLS_PARENT_POLICY')$policy
  description Verizon Business MPLS Circuit $MPLS_Circuit_ID
  bandwidth $MPLS_Bandwidth
  vrf forwarding $MPLS_VRF
@@ -515,111 +516,6 @@ interface $LAN_Intf.$IPT_VLAN_Number
 #if ($Internet_IP_Addr == '1.1.1.1') shutdown
 #else no shutdown
 #{end}#{end}
-!
-#if($ESM != 'N')interface Ethernet-Internal1/0/0
- description TRUNK TO SM-X-ES3-24-P INTERNAL MODULE
- platform switchport svi
-  switchport trunk native vlan 2
- switchport trunk allowed vlan 2,10,11
- switchport mode trunk
- no mop enabled
- no mop sysid
-!
-vlan $User_VLAN_Number
- name User_VLAN
-interface VLAN $User_VLAN_Number
- description Regular LAN
- ip address $User_VLAN_Address $User_VLAN_Mask
- ip helper-address $DHCP_ADDR1
- ip helper-address $DHCP_ADDR2
- no ip redirects
- ip nbar protocol-discovery
- service-policy input INGRESS_DSCP_MARKING_POLICY
-#if($SPOKE == 'DUAL') standby $User_VLAN_Number ip $User_VLAN_VIP
-#if($Router == '01') standby $User_VLAN_Number priority 200
-#{end}
- standby $User_VLAN_Number preempt
-#{end}
-vlan $Wireless_VLAN_Number
- name Wireless_VLAN
-interface Vlan $Wireless_VLAN_Number
- description Wireless LAN
- ip address $Wireless_VLAN_Address $Wireless_VLAN_Mask
- ip helper-address 10.42.2.52
- ip helper-address 10.32.2.52
- no ip redirects
- ip nbar protocol-discovery
- service-policy input INGRESS_DSCP_MARKING_POLICY
-#if($SPOKE == 'DUAL') standby $Wireless_VLAN_Number ip $User_VLAN_VIP
-#if($Router == '01') standby $Wireless_VLAN_Number priority 200
-#{end}
- standby $Wireless_VLAN_Number preempt
-#{end}
-!
-vlan $IPT_VLAN_Number
- name IPT_VLAN_IP
- exit
-interface Vlan $IPT_VLAN_Number
- description Voice LAN
- ip address $IPT_VLAN_Address $IPT_VLAN_Mask
- ip helper-address 10.42.2.52
- ip helper-address 10.32.2.52
- no ip redirects
- ip nbar protocol-discovery
- service-policy input INGRESS_DSCP_MARKING_POLICY
-#if($SPOKE == 'DUAL') standby $IPT_VLAN_Number ip $IPT_VLAN_VIP
-#if($Router == '01') standby $IPT_VLAN_Number priority 200
-#{end}
- standby $IPT_VLAN_Number preempt
-#{end}
-!
-#if($User2_VLAN_Number)vlan $User2_VLAN_Number
- name USER2 VLAN
-interface VLAN $User2_VLAN_Number
- description User VLAN 2 USER2_VLAN_NETWORK $User2_VLAN_Mask
- ip helper-address $DHCP_ADDR1
- ip helper-address $DHCP_ADDR2
- no ip redirects
- ip nbar protocol-discovery
- service-policy input INGRESS_DSCP_MARKING_POLICY
-#if($SPOKE == 'DUAL') standby $User2_VLAN_Number ip $User2_VLAN_VIP
-#if($Router == '01') standby $User2_VLAN_Number priority 200
-#{end}
- standby $User2_VLAN_Number preempt
-#{end}
-#{end}!
-#if($User3_VLAN_Number)vlan $User3_VLAN_Number
- name USER3 VLAN
-interface VLAN $User3_VLAN_Number
- description User VLAN 2 USER3_VLAN_NETWORK $User3_VLAN_Mask
- ip helper-address $DHCP_ADDR1
- ip helper-address $DHCP_ADDR2
- no ip redirects
- ip nbar protocol-discovery
- service-policy input INGRESS_DSCP_MARKING_POLICY
-#if($SPOKE == 'DUAL') standby $User3_VLAN_Number ip $User3_VLAN_VIP
-#if($Router == '01') standby $User3_VLAN_Number priority 200
-#{end}
- standby $User3_VLAN_Number preempt
-#{end}
-#{end}!
-#if($Customer_VLAN_Number)vlan $Customer_VLAN_Number
- name CUSTOMER Vlan
-interface Vlan $Customer_VLAN_Number
- description CUSTOMER Engagement Vlan
- ip addr $Customer_VLAN_Address $Customer_VLAN_Mask
- no ip redirects
- ip nbar protocol-discovery
- service-policy input INGRESS_DSCP_MARKING_POLICY
- #if($SPOKE == 'DUAL') standby $Customer_VLAN_Number ip $Customer_VLAN_VIP
-#if($Router == '01')standby $Customer_VLAN_Number priority 200
-#{end}
- standby $Customer_VLAN_Number preempt
-#{end}
-!
-#{end}
-
-#{end}
 !
 router eigrp ALLEGIS
  !
@@ -690,36 +586,6 @@ ip $aaa source-interface $AAA_SOURCE
 ip ssh time-out 60
 ip ssh version 2
 ip scp server enable
-!
-!
-#if($DC== 'DC2')!
-ip prefix-list default-route seq 100 permit 0.0.0.0/0
-route-map set-metrics permit 100
- description bump up $DC1 BR02 - INET to prefer Phoenix
- match ip address prefix-list default-route
- match tag 201
- set metric +3999999999
-route-map set-metrics permit 200
- description bump up $DC1 BR01 - MPLS to prefer Phoenix
- match ip address prefix-list default-route
- match tag 101
- set metric +4222222222
-#{end}
-route-map set-metrics permit 300
- description matches $DC1 BR02 - INET
- match tag 201
-route-map set-metrics permit 400
- description matches $DC1 BR01 - MPLS
- match tag 101
- set metric +1111111111
-route-map set-metrics permit 500
- description matches $DC2 BR02 - INET
- match tag 202
- set metric +2222222222
-route-map set-metrics permit 600
- description matches $DC2 BR02 - MPLS
- match tag 102
- set metric +3333333333
 !
 ip access-list extended ACL-INET-PUBLIC
  remark Only allow required ports/protocols into Public IP

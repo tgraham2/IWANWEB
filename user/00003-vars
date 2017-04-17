@@ -35,11 +35,11 @@ Tunnel_100_Address	10.246.125.89
 Tunnel_100_Mask	255.255.252.0
 Tunnel_200_Address	10.246.133.89
 Tunnel_200_Mask	255.255.252.0
-#User2_VLAN_Network	10.140.64.144
-#User2_VLAN_Mask	255.255.255.248
+User2_VLAN_Network	10.140.64.176
+User2_VLAN_Mask	255.255.255.248
 Customer_VLAN_Network	10.140.64.144
 Customer_VLAN_Mask	255.255.255.248
-#User2_VLAN_Number	50
-Customer_VLAN_Number	50
-SPOKE	SINGLE
+User2_VLAN_Number	50
+Customer_VLAN_Number	55
+SPOKE	DUAL
 Router_Loopback2	10.81.0.82

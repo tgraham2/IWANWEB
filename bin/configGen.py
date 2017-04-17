@@ -21,10 +21,8 @@ rt_template_4351='var_template-iwan-isr'
 rt_template_4331='var_template-iwan-isr'
 sw_template='var_template-ss-switch'
 #
-
-# want to print extra stuff on the screen?
-verbose = False
-#
+global runMode
+runMode = 'user'
 # show the dictionary when we are all done
 def show(key=''):
     """
@@ -64,11 +62,13 @@ def rtrConfig(varfile,region):
     from splitpfx import splitpfx
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region.lower()
     tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
-    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
+    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin',runMode).replace('\\','/')
     print('rtrC',dataPath,usrData)
     # initialize dictionary
     global var_dict
     var_dict = {}
+    if runMode == 'data': # Manually set value for 'Region'
+        var_dict['Region']=region
     #########################
     # get defaults
     get_varFile('defaults','%s/%s' % (dataPath,'default-vars') )
@@ -230,9 +230,11 @@ def rtrConfig(varfile,region):
     return rtrConfig
     #
 def swConfig(varfile,region):
+    if runMode == 'data': # Manually set value for 'Region'
+        var_dict['Region']=region
     tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
-    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
+    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin',runMode).replace('\\','/')
     ipUser=IPNetwork( '%s/%s' % (var_dict['User_VLAN_Network'], var_dict['User_VLAN_Mask']))
     # get switch mgmt address (.3) the standard is to use the .3 of the user network
     var_dict['Switch_Address'] = str(IPAddress(int(ipUser.network)+3))
@@ -265,5 +267,6 @@ def gen_config(vf,reg):
     rtrConfig(vf,reg)
     swConfig (vf,reg)
 if __name__ == '__main__':
+    runMode = 'test'
     s,r=input('site/region:').split(',')
     gen_config ('%s-vars' % s , r )
