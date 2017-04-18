@@ -2,9 +2,13 @@
 from netaddr import *
 #
 def splitpfx(ip):
+    subnets = []
     nw = IPNetwork( '%s/%s' % (IPNetwork( ip ).network,IPNetwork( ip ).netmask) )
     #
-    if nw.prefixlen == 21:
+    if nw.prefixlen >= 28:
+        subnets.append(str(nw))
+        return subnets
+    elif nw.prefixlen == 21:
         jend = 128
     elif nw.prefixlen == 22:
         jend = 64
@@ -18,7 +22,7 @@ def splitpfx(ip):
         print (nw, 'not supported')
         return None
     #
-    subnets = []
+
     for j in range (0,jend):
         x = IPNetwork('0.0.0.0')
         x.prefixlen = 28
@@ -27,7 +31,7 @@ def splitpfx(ip):
     return subnets
 #
 if __name__ == "__main__":
-    for i in ['10.10.10.1/26','10.10.10.200/24','10.10.10.0/23', \
+    for i in ['10.10.10.32/28','10.10.10.1/26','10.10.10.200/24','10.10.10.0/23', \
               '10.10.10.0/22','10.10.10.0/21']:
         x = splitpfx(i)
         print (i, x[0:10])

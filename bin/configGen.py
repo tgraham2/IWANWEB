@@ -23,10 +23,8 @@ rt_template_4351='var_template-iwan-isr'
 rt_template_4331='var_template-iwan-isr'
 sw_template='var_template-ss-switch'
 #
-
-# want to print extra stuff on the screen?
-verbose = False
-#
+global runMode
+runMode = 'user'
 # show the dictionary when we are all done
 def show(key=''):
     """
@@ -57,18 +55,28 @@ def get_varFile(desc,fid):
             # eliminate spaces in parms
             var_dict[parms[0]]=parms[1].replace(" ",'_')
         except:
-            print ('getvarfile/error:',desc,parms)
+            var_dict[parms[0]]=None
+            print ('getvar/error',parms[0])
             continue
     finput.close()
     
 def rtrConfig(varfile,region):
     from splitpfx import splitpfx
+<<<<<<< HEAD
     tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
     usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
+=======
+    dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region.lower()
+    tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
+    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin',runMode).replace('\\','/')
+    print('rtrC',dataPath,usrData)
+>>>>>>> origin/master
     # initialize dictionary
     global var_dict
     var_dict = {}
+    if runMode == 'data': # Manually set value for 'Region'
+        var_dict['Region']=region
     #########################
     # get defaults
     get_varFile('defaults','%s/%s' % (dataPath,'default-vars') )
@@ -80,13 +88,18 @@ def rtrConfig(varfile,region):
     get_varFile('site','%s/%s' % (usrData,varfile) )
     #
     # convert to integer for range operator
-    if 'MPLS_Interface_Number_of_Links' in var_dict:
-        var_dict['iMPLS_Interface_Number_of_Links'] = \
-        int(var_dict['MPLS_Interface_Number_of_Links'])
+    try:
+        var_dict['iMPLS_Interface_Number_of_Links'] = int(var_dict['MPLS_Interface_Number_of_Links'])
+    except:
+        pass
     #
     # pick router template based on model
     # mask overrides value in site var file!!!
+<<<<<<< HEAD
     if (var_dict['Router_Model']=='4331'):
+=======
+    if (var_dict['Router_Model']=='ISR4331/K9'):
+>>>>>>> origin/master
         tmpl_file = '%s/%s' % (tmplPath,rt_template_4331)
 
 
@@ -117,7 +130,7 @@ def rtrConfig(varfile,region):
     var_dict['IPT_VLAN_Address']=str(IPAddress(int(ipIPT.network)+1))
     var_dict['IPT_VLAN_Pfx']=splitpfx(ipIPT)
     #
-    if var_dict['User2_VLAN_Number'] != 'NONE':
+    if var_dict['User2_VLAN_Number'] != None:
         print ('adding User2 Network',var_dict['User2_VLAN_Number'])
         ipUser2=IPNetwork(var_dict['User2_VLAN_Network']+'/'+var_dict['User2_VLAN_Mask'])
         var_dict['User2_VLAN_Network']=ipUser2.network
@@ -125,7 +138,17 @@ def rtrConfig(varfile,region):
         var_dict['User2_VLAN_WCmask']=str(ipUser2.network) +' '+ str(ipUser2.hostmask)
         var_dict['User2_VLAN_Address']=str(IPAddress(int(ipUser2.network)+1))
         var_dict['User2_VLAN_Pfx']=splitpfx(ipUser2)
-    if var_dict['Customer_VLAN_Number'] != 'NONE':
+
+    if var_dict['User3_VLAN_Number'] != None:
+        print ('adding User3 Network',var_dict['User3_VLAN_Number'])
+        ipUser3=IPNetwork(var_dict['User3_VLAN_Network']+'/'+var_dict['User3_VLAN_Mask'])
+        var_dict['User3_VLAN_Network']=ipUser3.network
+        var_dict['User3_VLAN_CIDR']=ipUser3.cidr
+        var_dict['User3_VLAN_WCmask']=str(ipUser3.network) +' '+ str(ipUser3.hostmask)
+        var_dict['User3_VLAN_Address']=str(IPAddress(int(ipUser3.network)+1))
+        var_dict['User3_VLAN_Pfx']=splitpfx(ipUser3)
+   
+    if var_dict['Customer_VLAN_Number'] != None:
         print ('adding Customer Network',var_dict['Customer_VLAN_Number'])
         ipCustomer=IPNetwork(var_dict['Customer_VLAN_Network']+'/'+var_dict['Customer_VLAN_Mask'])
         var_dict['Customer_VLAN_Network']=ipCustomer.network
@@ -182,6 +205,7 @@ def rtrConfig(varfile,region):
             break
     var_dict['Router']='01'
     nodeName = "%s_%s%s" %( var_dict['City'], "00000"[:5-len(var_dict['SiteNo'])],var_dict['SiteNo'])
+    var_dict['Hostname'] = '%sR%s' % (nodeName,var_dict['Router'])
     configName = '%s-R%s-cfg' % (nodeName,var_dict['Router'])
     config_output=open('%s/%s' % (usrData,configName) ,'w')
     rtrConfig=[configName]
@@ -196,6 +220,7 @@ def rtrConfig(varfile,region):
     # create a 2nd config for DUAL router spoke site
     if (var_dict['SPOKE'] == 'DUAL'):
         var_dict['Router']='02'
+        var_dict['Hostname'] = '%sR%s' % (nodeName,var_dict['Router'])
         configName = '%s-R%s-cfg' % (nodeName,var_dict['Router'])
         config_output=open('%s/%s' % (usrData,configName) ,'w')
         rtrConfig.append(configName)
@@ -217,9 +242,14 @@ def rtrConfig(varfile,region):
     return rtrConfig
     #
 def swConfig(varfile,region):
+<<<<<<< HEAD
+=======
+    if runMode == 'data': # Manually set value for 'Region'
+        var_dict['Region']=region
+>>>>>>> origin/master
     tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
-    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
+    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin',runMode).replace('\\','/')
     ipUser=IPNetwork( '%s/%s' % (var_dict['User_VLAN_Network'], var_dict['User_VLAN_Mask']))
     # get switch mgmt address (.3) the standard is to use the .3 of the user network
     var_dict['Switch_Address'] = str(IPAddress(int(ipUser.network)+3))
@@ -240,7 +270,11 @@ def swConfig(varfile,region):
     sw_output=open('%s/%s' % (usrData,swConfigName),'w')
     swConfig = [swConfigName]
     sw_output.write('! SW Configuration generated: '+time.strftime("%Y-%m-%d %H:%M:%S")+'\n')
+<<<<<<< HEAD
     #template=airspeed.Template( file('%s/%s' % (dataPath,sw_template) ).read() )
+=======
+    #template=airspeed.Template( file('%s/%s' % (tmplPath,sw_template) ).read() )
+>>>>>>> origin/master
     with open('%s/%s' % (tmplPath,sw_template) ) as tmpl:
             template=airspeed.Template( tmpl.read() )
     sw_output.write(template.merge(var_dict))
@@ -248,9 +282,19 @@ def swConfig(varfile,region):
     return swConfig
 
 print (" type 'show()' to see the dictionary ")
+<<<<<<< HEAD
 def gen_config(vf):
     rtrConfig(vf,'test')
     swConfig (vf,'test')
 if __name__ == '__main__':
     SiteNo=input('site:').strip()
     gen_config ('%s-vars' % (SiteNo) )
+=======
+def gen_config(vf,reg):
+    rtrConfig(vf,reg)
+    swConfig (vf,reg)
+if __name__ == '__main__':
+    runMode = 'test'
+    s,r=input('site/region:').split(',')
+    gen_config ('%s-vars' % s , r )
+>>>>>>> origin/master

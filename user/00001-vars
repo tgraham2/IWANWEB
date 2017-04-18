@@ -1,0 +1,35 @@
+# 958 Lebanon (Frame Relay)
+State	PENNSYLVANIA
+City	LEBANON
+SiteNo	958
+MPLS_Bandwidth	1500
+MPLS_Circuit_ID	lebanon-pa_w0y40839-2063079
+MPLS_IP_Remote	68.137.253.217
+MPLS_IP_Local	68.137.253.218
+MPLS_Mask	255.255.255.252
+MPLS_Interface_Type	frame
+MPLS_Interface_Number_of_Links	
+FRAME_DLCI	50
+Internet_Service	D100.0M/U20.0M
+Internet_Bandwidth	20000
+Internet_Carrier	MetTel
+Internet_Circuit_ID	13.NBCB.103961  
+Internet_ISP	Cox  
+ISP_Circuit_ID	8993112420342748
+Internet_IP_Remote	173.163.31.114
+Internet_IP_Local	173.163.31.113
+Internet_Mask_Local	255.255.255.252
+Router_Loopback	10.81.0.139
+Router_Model	4351
+Tunnel_100_Address	10.246.124.17
+Tunnel_100_Mask	255.255.252.0
+Tunnel_200_Address	10.246.132.17
+Tunnel_200_Mask	255.255.252.0
+Switch_Stack_Size	1
+User_VLAN_Number	2
+User_VLAN_Network	10.106.55.0
+User_VLAN_Mask	255.255.255.0
+Wireless_VLAN_Number	10
+Wireless_VLAN_Network	10.106.57.0
+IPT_VLAN_Number	11
+IPT_VLAN_Network	10.106.56.0

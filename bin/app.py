@@ -46,7 +46,7 @@ app = web.application(urls, globals())
 application = app.wsgifunc()
 
 web.config.debug = True
-
+"""
 global session
 if web.config.get('_session') is None:
     store = web.session.DiskStore(sessPath)
@@ -55,7 +55,7 @@ if web.config.get('_session') is None:
     web.config._session = session
 else:
     session = web.config._session
-    
+"""    
 render = web.template.render(tmplPath,base='base') # template directory
 global site_data, site_keys 
 site_data = {
@@ -68,12 +68,13 @@ site_data = {
     'MPLS_Type':["MPLS Handoff","Ethernet, MLPPP or Frame Relay"],
     'SpokeType':["Router Mode","Spoke has Single or Dual Routers"],
     'Router_Model':["Router Model","Router Model for PNP"],
+    'ESM' : ["ESM Slot", "ESM slot (if present; 4331 only)"],
     'AE_Project':["APIC-EM Project Name","Project Name APIC-EM for PNP"],
     'AE_Server': ["APIC-EM Server","APIC-EM Server for storing data"],
     'AE_UID': ["APID-EM User ID","User ID for storing data on APIC-EM"],
     'AE_PWD': ["APID-EM Password","APIC-EM password"]
     }
-site_keys=["SiteNo","City","Region","SiteKey","SerialNo","DC","MPLS_Type","SpokeType","Router_Model", \
+site_keys=["SiteNo","City","Region","SiteKey","SerialNo","DC","MPLS_Type","SpokeType","Router_Model", "ESM",
            "AE_Project", "AE_Server", "AE_UID", "AE_PWD"
            ]
 global site_form
@@ -90,6 +91,7 @@ site_form = form.Form(
         form.Radio('SpokeType', ["SINGLE", "DUAL"], description="Spoke Router Mode", value="SINGLE" ),
         form.Dropdown("Router_Model",description="Router Model", \
                       args=["ISR4351/K9","ISR4331/K9","Other"], value="ISR4351/K9"),
+        form.Textbox('ESM', description = "Embedded Switch Slot", value="N",post="(usually 1/0 if present; 4331 only)" ),
         form.Textbox("AE_Project",description="APIC-EM Project Name", value="demo"),
         form.Dropdown("AE_Server", description="APIC-EM Server for saves", \
                       args = ["production","demo"], value="demo"),
@@ -174,9 +176,15 @@ class Site:
             # [ label, value, description]
             sdict[element]=[site_data[element][0],f[element],site_data[element][1]]
             #print element,sdict[element]
-        if (sdict['SiteKey'] != None) and (sdict['Region'][1]!='EMEA'):
+        print ('site key:',sdict['SiteKey'][1], sdict['SiteKey'][1] == None, sdict['SiteKey'][1] == '' )
+        if sdict['SiteKey'][1] == '':
+            sdict['SiteKey'][1] = None
+        if (sdict['SiteKey'][1] != None) and (sdict['Region'][1]!='EMEA'):
             print ("Warning: Changing Region to EMEA")
             sdict['Region'][1]='EMEA'
+        if (sdict['ESM'][1] != 'N') & (sdict["Router_Model"][1] != "ISR4331/K9"):
+            print ("Warning: Changing Model to 'ISR4331/K9'")
+            sdict["Router_Model"][1] = "ISR4331/K9"
         nodeName = "%s_%s%s" %( sdict['City'][1], "00000"[:5-len(sdict['SiteNo'][1])],sdict['SiteNo'][1])
         dataPath = realPath.replace('\\','/').replace('bin','data') + '/' + sdict['Region'][1].lower()
         print ("DP:",dataPath, sdict['Region'][1].lower() )
@@ -332,7 +340,7 @@ class WRITE:
             with open('%s/%s' % (usrData,varFile) , 'w') as fv:
                 for key in x_keys:
                     fv.write('%s\t%s\n' % (key,x_dict[key][1] ) )
-                fv.write('%s\t%s\n' % ('City',x_dict['City'][1] ) )
+                #fv.write('%s\t%s\n' % ('City',x_dict['City'][1] ) )
             # generate configuration
             if x_dict['Router_Gen'][1] == 'T':
                 rtrCnfFile = rtrConfig(varFile,x_dict['Region'][1]) # gen_config returns list of config file names

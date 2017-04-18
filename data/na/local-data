@@ -1,5 +1,3 @@
-State	State	<no default>	Office State
-City	City	<no default>	Office City
 Router_Loopback	Router Loopback	<no default>	Unique Loopback /32
 User_VLAN_Number	User VLAN Number	2	VLAN ID for User/Data Network
 User_VLAN_Network	User VLAN Network	<no default>	Network address for User/Data
@@ -10,7 +8,7 @@ Wireless_VLAN_Mask	Wireless VLAN Mask	255.255.255.0	Mask for Wireless
 IPT_VLAN_Number	IPT VLAN Number	11	VLAN ID for IP Telephony
 IPT_VLAN_Network	IPT VLAN Network	<no default>	value must be a network consistent with the mask
 IPT_VLAN_Mask	IPT VLAN Mask	255.255.255.0	Mask for IPT Network
-Customer_VLAN_Number	Customer VLAN Number	NONE	VLAN number for customer VLAN; put 'NONE' if there is none
+Customer_VLAN_Number	Customer VLAN Number		VLAN number for customer VLAN; put 'NONE' if there is none
 Customer_VLAN_Network	Customer VLAN Network	NONE	Value must be a network
 Customer_VLAN_Mask	Customer VLAN Mask	NONE	Mask for customer network
 Tunnel_100_Address	Tunnel 100 Address	255.255.255.0	Tunnel Address for MPLS IWAN Tunnel
@@ -22,12 +20,7 @@ Router	Router	1	Router ID Number
 Switch_Gen	Switch Gen	T	Generate configuration for Switch stack? (T/F)
 Switch_Stack_Size	Switch Stack Size	1	Number of switches in the stack
 TenG_Switch	TenG Switch	F	set to T for one of those Ten Gig model 3650 switch
-User2_VLAN_Number	User2 VLAN Number	NONE	VLAN ID for User2/Data Network
+User2_VLAN_Number	User2 VLAN Number		VLAN ID for User2/Data Network
 User2_VLAN_Network	User2 VLAN Network	NONE	Network address for User2/Data
 User2_VLAN_Mask	User2 VLAN Mask	255.255.255.0	Mask for User2/Data
-# TESTING
-City	City	TestCity	Office City
-Router_Loopback	Router Loopback	1.0.0.1	Unique Loopback /32
-User_VLAN_Network	User VLAN Network	10.0.2.0	Network address for User/Data
-Wireless_VLAN_Network	Wireless VLAN Network	10.0.10.0	Network address for Wireless
-IPT_VLAN_Network	IPT VLAN Network	10.0.11.0	value must be a network consistent with the mask
+User3_VLAN_Number	User3 VLAN Number		VLAN ID for User3/Data Network
