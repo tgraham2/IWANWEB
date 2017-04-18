@@ -1,0 +1,42 @@
+# 00005 - Ethernet Arlington/952 with 4331
+State	VIRGINIA
+City	ARLINGTON
+SiteNo	00005
+Router_SN	FLM1946W0TF
+Router_Model	ISR4331/K9
+ESM	1/0
+MPLS_Bandwidth	10000
+MPLS_Circuit_ID	arlington-va_bcbk09ym0001-edbk09ms0001-5362196
+MPLS_IP_Remote	68.136.127.125
+MPLS_IP_Local	68.136.127.126
+MPLS_Mask	255.255.255.252
+MPLS_Interface_Type	Gi
+MPLS_Interface	Gigabit0/0/1
+MPLS_Interface_Number_of_Links	
+PPP_HOSTNAME	
+FRAME_DLCI
+Internet_Service	D150.0M/U20.0M
+Internet_Bandwidth	20000
+Internet_Carrier	MetTel
+Carrier_Circuit_ID	18.NBCB.104372
+Internet_ISP	Comcast
+ISP_Circuit_ID	561398148401
+Internet_IP_Remote	96.83.101.98
+Internet_IP_Local	96.83.101.97
+Internet_Mask	255.255.255.252
+Router_Loopback	10.81.1.6
+Router_Model	4351
+Tunnel_100_Address	10.246.124.14
+Tunnel_100_Mask	255.255.252.0
+Tunnel_200_Address	10.246.132.14
+Tunnel_200_Mask	255.255.252.0
+Switch_Stack_Size	2
+User_VLAN_Number	2
+User_VLAN_Network	10.108.51.0
+User_VLAN_Mask	255.255.255.0
+Wireless_VLAN_Number	10
+Wireless_VLAN_Network	10.108.52.0
+Wireless_VLAN_Mask	255.255.255.0
+IPT_VLAN_Number	11
+IPT_VLAN_Network	10.251.238.0
+IPT_VLAN_Mask	255.255.255.0

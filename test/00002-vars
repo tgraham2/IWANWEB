@@ -1,0 +1,37 @@
+# 00002 - Multilink PPP  Fairfax/422
+State	VIRGINIA
+City	Fairfax
+SiteNo	00002
+Router_SN	FDO19431FLB
+MPLS_Bandwidth	4500
+MPLS_Circuit_ID	W0Y00652
+MPLS_IP_Remote	152.183.136.101
+MPLS_IP_Local	152.183.136.102
+MPLS_Mask	255.255.255.252
+MPLS_Interface_Type	mppp
+MPLS_Interface_Number_of_Links	3
+PPP_HOSTNAME	w0y00652-2021085
+FRAME_DLCI
+Internet_Service	D150.0M/U20.0M
+Internet_Bandwidth	20000
+Internet_Carrier	MetTel
+Internet_Circuit_ID	18.NBCB.104373
+Internet_ISP	Cox  
+ISP_Circuit_ID	487608-02
+Internet_IP_Remote	184.191.39.1
+Internet_IP_Local	184.191.39.23
+Internet_Mask_Local	255.255.255.224 
+Router_Loopback	10.81.0.46
+Router_Model	4351
+Tunnel_100_Address	10.246.124.16
+Tunnel_100_Mask	255.255.252.0
+Tunnel_200_Address	10.246.132.16
+Tunnel_200_Mask	255.255.252.0
+Switch_Stack_Size	3
+User_VLAN_Number	2
+User_VLAN_Network	10.108.5.0
+User_VLAN_Mask	255.255.255.0
+Wireless_VLAN_Number	10
+Wireless_VLAN_Network	10.108.6.0
+IPT_VLAN_Number	11
+IPT_VLAN_Network	10.251.231.0
