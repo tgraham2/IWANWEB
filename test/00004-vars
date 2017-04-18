@@ -9,7 +9,7 @@ MPLS_Circuit_ID	arlington-va_bcbk09ym0001-edbk09ms0001-5362196
 MPLS_IP_Remote	68.136.127.125
 MPLS_IP_Local	68.136.127.126
 MPLS_Mask	255.255.255.252
-MPLS_Interface_Type	Gi
+MPLS_Interface_Type	Ethernet
 MPLS_Interface	Gigabit0/0/1
 MPLS_Interface_Number_of_Links	
 PPP_HOSTNAME	

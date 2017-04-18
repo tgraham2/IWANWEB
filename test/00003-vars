@@ -1,7 +1,7 @@
 # 00003 - Two routers
 State	KY
 City	Louisville
-Office_No	98
+SiteNo	98
 Switch_Stack_Size	3
 TenG_Switch	F
 Router_SN	XXXXX

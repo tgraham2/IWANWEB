@@ -62,16 +62,10 @@ def get_varFile(desc,fid):
     
 def rtrConfig(varfile,region):
     from splitpfx import splitpfx
-<<<<<<< HEAD
-    tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
-    dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
-    usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin','user').replace('\\','/')
-=======
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region.lower()
     tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin',runMode).replace('\\','/')
     print('rtrC',dataPath,usrData)
->>>>>>> origin/master
     # initialize dictionary
     global var_dict
     var_dict = {}
@@ -95,14 +89,8 @@ def rtrConfig(varfile,region):
     #
     # pick router template based on model
     # mask overrides value in site var file!!!
-<<<<<<< HEAD
-    if (var_dict['Router_Model']=='4331'):
-=======
     if (var_dict['Router_Model']=='ISR4331/K9'):
->>>>>>> origin/master
         tmpl_file = '%s/%s' % (tmplPath,rt_template_4331)
-
-
     else:
         tmpl_file = '%s/%s' % (tmplPath,rt_template_4351)
 
@@ -242,11 +230,8 @@ def rtrConfig(varfile,region):
     return rtrConfig
     #
 def swConfig(varfile,region):
-<<<<<<< HEAD
-=======
     if runMode == 'data': # Manually set value for 'Region'
         var_dict['Region']=region
->>>>>>> origin/master
     tmplPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')
     dataPath = os.path.dirname(os.path.realpath(__file__)).replace('bin','data').replace('\\','/')+ '/' + region
     usrData = os.path.dirname(os.path.realpath(__file__)).replace('bin',runMode).replace('\\','/')
@@ -270,11 +255,6 @@ def swConfig(varfile,region):
     sw_output=open('%s/%s' % (usrData,swConfigName),'w')
     swConfig = [swConfigName]
     sw_output.write('! SW Configuration generated: '+time.strftime("%Y-%m-%d %H:%M:%S")+'\n')
-<<<<<<< HEAD
-    #template=airspeed.Template( file('%s/%s' % (dataPath,sw_template) ).read() )
-=======
-    #template=airspeed.Template( file('%s/%s' % (tmplPath,sw_template) ).read() )
->>>>>>> origin/master
     with open('%s/%s' % (tmplPath,sw_template) ) as tmpl:
             template=airspeed.Template( tmpl.read() )
     sw_output.write(template.merge(var_dict))
@@ -282,14 +262,6 @@ def swConfig(varfile,region):
     return swConfig
 
 print (" type 'show()' to see the dictionary ")
-<<<<<<< HEAD
-def gen_config(vf):
-    rtrConfig(vf,'test')
-    swConfig (vf,'test')
-if __name__ == '__main__':
-    SiteNo=input('site:').strip()
-    gen_config ('%s-vars' % (SiteNo) )
-=======
 def gen_config(vf,reg):
     rtrConfig(vf,reg)
     swConfig (vf,reg)
@@ -297,4 +269,3 @@ if __name__ == '__main__':
     runMode = 'test'
     s,r=input('site/region:').split(',')
     gen_config ('%s-vars' % s , r )
->>>>>>> origin/master
