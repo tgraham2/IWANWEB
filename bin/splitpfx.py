@@ -15,7 +15,7 @@ def splitpfx(ip):
     elif nw.prefixlen == 26:
         jend = 4
     else:
-        print nw, 'not supported'
+        print (nw, 'not supported')
         return None
     #
     subnets = []
@@ -30,5 +30,5 @@ if __name__ == "__main__":
     for i in ['10.10.10.1/26','10.10.10.200/24','10.10.10.0/23', \
               '10.10.10.0/22','10.10.10.0/21']:
         x = splitpfx(i)
-        print i, x[0:10]
+        print (i, x[0:10])
     
