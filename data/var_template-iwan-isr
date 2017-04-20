@@ -196,6 +196,9 @@ policy-map WAN_CHILD_POLICY
  class CALL-SIGNALING
   bandwidth remaining percent 6 
   set dscp af41
+ class EGRESS-CRITICAL-DATA
+  bandwidth remaining percent 35 
+  set dscp af31
  class STREAMING-VIDEO
   bandwidth remaining percent 12 
   random-detect dscp-based
@@ -206,9 +209,6 @@ policy-map WAN_CHILD_POLICY
  class SCAVENGER
   bandwidth remaining percent 1 
   set dscp af11
- class EGRESS-CRITICAL-DATA
-  bandwidth remaining percent 35 
-  set dscp af31
  class class-default
   bandwidth remaining percent 4 
   random-detect
@@ -488,14 +488,14 @@ interface $LAN_Intf.$IPT_VLAN_Number
  encap dot1q $MPLS_VLAN
  no shutdown
 #{end}
- service-policy output #set($policy= $MPLS_Interface + $!{MPLS_Subinterface} + '_MPLS_PARENT_POLICY')$policy
+ service-policy output #set($policy= $MPLS_Interface + '_MPLS_PARENT_POLICY')$policy
  description Verizon Business MPLS Circuit $MPLS_Circuit_ID
  bandwidth $MPLS_Bandwidth
  vrf forwarding $MPLS_VRF
  ip address $MPLS_IP_Addr $MPLS_Mask
  no negotiation auto
  !
-#{else}interface #set($intf = $MPLS_Interface + $!{MPLS_Subinterface})$intf
+#{else}interface ${MPLS_Interface}${MPLS_Subinterface}
  no ip address
  desc not in use
  shut
@@ -688,36 +688,6 @@ ip ssh time-out 60
 ip ssh version 2
 ip scp server enable
 !
-!
-#if($DC== 'DC2')!
-ip prefix-list default-route seq 100 permit 0.0.0.0/0
-route-map set-metrics permit 100
- description bump up $DC1 BR02 - INET to prefer Phoenix
- match ip address prefix-list default-route
- match tag 201
- set metric +3999999999
-route-map set-metrics permit 200
- description bump up $DC1 BR01 - MPLS to prefer Phoenix
- match ip address prefix-list default-route
- match tag 101
- set metric +4222222222
-#{end}
-route-map set-metrics permit 300
- description matches $DC1 BR02 - INET
- match tag 201
-route-map set-metrics permit 400
- description matches RP BR01 - MPLS
- match tag 101
- set metric +1111111111
-route-map set-metrics permit 500
- description matches PHX BR02 - INET
- match tag 202
- set metric +2222222222
-route-map set-metrics permit 600
- description matches PHX BR02 - MPLS
- match tag 102
- set metric +3333333333
-!
 ip access-list extended ACL-INET-PUBLIC
  remark Only allow required ports/protocols into Public IP
  permit udp any any eq non500-isakmp
@@ -845,6 +815,9 @@ route-map BRANCH-OUT deny 20
 !
 route-map BRANCH-OUT permit 1000
 !
+#if($Region == 'EMEA')snmp-server community ageurWAN RO 9
+#end
+!
 snmp-server user $LA_USER GR_SNMPv3 v3 auth sha $LA_PSWD
 snmp-server user $SNMP_USER GR_SNMPv3 v3 auth sha $SNMP_PSWD
 snmp-server group GR_SNMPv3 v3 auth read SNMPv3_Read write SNMPv3_Write access 9
@@ -854,7 +827,7 @@ snmp-server view SNMPv3_Write iso included
 snmp-server trap-source Loopback0
 snmp-server packetsize 1372
 snmp-server tftp-server-list 9
-snmp-server location Assettag $Router_SN
+snmp-server location $Region $City
 snmp ifmib ifindex persist
 snmp mib nhrp
 snmp-server enable traps snmp authentication linkdown linkup coldstart warmstart
