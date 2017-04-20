@@ -542,8 +542,8 @@ vlan $Wireless_VLAN_Number
 interface Vlan $Wireless_VLAN_Number
  description Wireless LAN
  ip address $Wireless_VLAN_Address $Wireless_VLAN_Mask
- ip helper-address 10.42.2.52
- ip helper-address 10.32.2.52
+ ip helper-address $DHCP_ADDR1
+ ip helper-address $DHCP_ADDR2
  no ip redirects
  ip nbar protocol-discovery
  service-policy input INGRESS_DSCP_MARKING_POLICY
@@ -559,8 +559,8 @@ vlan $IPT_VLAN_Number
 interface Vlan $IPT_VLAN_Number
  description Voice LAN
  ip address $IPT_VLAN_Address $IPT_VLAN_Mask
- ip helper-address 10.42.2.52
- ip helper-address 10.32.2.52
+ ip helper-address $DHCP_ADDR1
+ ip helper-address $DHCP_ADDR2
  no ip redirects
  ip nbar protocol-discovery
  service-policy input INGRESS_DSCP_MARKING_POLICY
