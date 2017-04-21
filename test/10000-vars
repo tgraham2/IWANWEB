@@ -1,0 +1,55 @@
+# 10000 Ethernet 1262/Glasgow
+SiteNo	10000
+City	Glasgow
+Region	EMEA
+SiteKey	28
+SerialNo	
+DC	DC1
+MPLS_Type	Ethernet
+SpokeType	SINGLE
+Router_Model	ISR4351/K9
+ESM	N
+Router_Loopback	10.180.254.28
+User_VLAN_Number	180
+User_VLAN_Network	10.180.28.0
+User_VLAN_Mask	255.255.255.0
+Wireless_VLAN_Number	10
+Wireless_VLAN_Network	10.180.29.0
+Wireless_VLAN_Mask	255.255.255.0
+IPT_VLAN_Number	182
+IPT_VLAN_Network	10.182.28.0
+IPT_VLAN_Mask	255.255.255.0
+Customer_VLAN_Number	
+Customer_VLAN_Network	NONE
+Customer_VLAN_Mask	NONE
+Tunnel_100_Address	10.244.124.28
+Tunnel_100_Mask	255.255.252.0
+Tunnel_200_Address	10.244.132.28
+Tunnel_200_Mask	255.255.252.0
+Router_Gen	T
+Router_Loopback2	10.180.254.29
+Switch_Gen	T
+Switch_Stack_Size	1
+TenG_Switch	F
+User2_VLAN_Number	
+User2_VLAN_Network	NONE
+User2_VLAN_Mask	255.255.255.0
+MPLS_Interface_Type	Ethernet
+MPLS_Bandwidth	8500
+MPLS_Circuit_ID	LEED9E01 Circuit C1031683, Service 90164747, PVC 5706516
+MPLS_IP_Addr	68.139.214.246
+MPLS_IP_GW	68.139.214.245
+MPLS_Mask	255.255.255.252
+MPLS_Interface	GigabitEthernet0/0/1
+MPLS_Subinterface	104
+Internet_Interface	GigabitEthernet0/0/2
+Internet_Service	10MB DIA
+Internet_Bandwidth	10000
+Internet_BW_Down	10000
+Internet_Carrier	MetTel
+Carrier_Circuit_ID	10.RBBU.100668
+Internet_ISP	<ISP>
+ISP_Circuit_ID	ORD-01624038.1
+Internet_IP_Addr	185.62.118.130
+Internet_IP_GW	185.62.118.129
+Internet_Mask	255.255.255.252
