@@ -30,10 +30,13 @@ Internet_BW_Down	5000
 #
 MPLS_IP_Mask	255.255.255.252
 MPLS_Interface_Type	Ethernet
-MPLS_Intf	GigabitEthernet0/0/1
+MPLS_Interface	GigabitEthernet0/0/1
+FRAME_DLCI	16
+MPLS_Interface_Number_of_Links	3
+MPLS_Bandwidth	4500
 #	
 TenG_Switch	F
-Router_Model	4351
+Router_Model	ISR4351/K9
 Router_Gen	T
 Switch_Gen	T
 Switch_Stack_Size	0
