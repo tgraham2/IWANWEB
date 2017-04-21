@@ -1,5 +1,5 @@
-# 10000  Ethernet1262/Glasgow
-SiteNo	10000
+# 10002 MLPPP 1262/Glasgow
+SiteNo	10002
 City	Glasgow
 Region	EMEA
 SiteKey	28
@@ -33,8 +33,10 @@ TenG_Switch	F
 User2_VLAN_Number	
 User2_VLAN_Network	NONE
 User2_VLAN_Mask	255.255.255.0
-MPLS_Interface_Type	Ethernet
-MPLS_Bandwidth	8500
+MPLS_Interface_Type	mppp
+PPP_HOSTNAME	c1031683
+MPLS_Interface_Number_of_Links	3
+MPLS_Bandwidth	6000
 MPLS_Circuit_ID	LEED9E01 Circuit C1031683, Service 90164747, PVC 5706516
 MPLS_IP_Addr	68.139.214.246
 MPLS_IP_GW	68.139.214.245
