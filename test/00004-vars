@@ -6,7 +6,7 @@ Router_SN	FLM1946W0TF
 Router_Model	ISR4331/K9
 MPLS_Bandwidth	10000
 MPLS_Circuit_ID	arlington-va_bcbk09ym0001-edbk09ms0001-5362196
-MPLS_IP_Remote	68.136.127.125
+MPLS_IP_GW	68.136.127.125
 MPLS_IP_Local	68.136.127.126
 MPLS_Mask	255.255.255.252
 MPLS_Interface_Type	Ethernet
@@ -20,7 +20,7 @@ Internet_Carrier	MetTel
 Carrier_Circuit_ID	18.NBCB.104372
 Internet_ISP	Comcast
 ISP_Circuit_ID	561398148401
-Internet_IP_Remote	96.83.101.98
+Internet_IP_GW	96.83.101.98
 Internet_IP_Local	96.83.101.97
 Internet_Mask	255.255.255.252
 Router_Loopback	10.81.1.6

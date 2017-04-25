@@ -4,7 +4,7 @@ City	LEBANON
 SiteNo	00001
 MPLS_Bandwidth	1500
 MPLS_Circuit_ID	lebanon-pa_w0y40839-2063079
-MPLS_IP_Remote	68.137.253.217
+MPLS_IP_GW	68.137.253.217
 MPLS_IP_Local	68.137.253.218
 MPLS_Mask	255.255.255.252
 MPLS_Interface_Type	frame
@@ -16,7 +16,7 @@ Internet_Carrier	MetTel
 Internet_Circuit_ID	13.NBCB.103961  
 Internet_ISP	Cox  
 ISP_Circuit_ID	8993112420342748
-Internet_IP_Remote	173.163.31.114
+Internet_IP_GW	173.163.31.114
 Internet_IP_Local	173.163.31.113
 Internet_Mask_Local	255.255.255.252
 Router_Loopback	10.81.0.139

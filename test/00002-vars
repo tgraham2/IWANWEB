@@ -5,7 +5,7 @@ SiteNo	00002
 Router_SN	FDO19431FLB
 MPLS_Bandwidth	4500
 MPLS_Circuit_ID	W0Y00652
-MPLS_IP_Remote	152.183.136.101
+MPLS_IP_GW	152.183.136.101
 MPLS_IP_Local	152.183.136.102
 MPLS_Mask	255.255.255.252
 MPLS_Interface_Type	mppp
@@ -18,7 +18,7 @@ Internet_Carrier	MetTel
 Internet_Circuit_ID	18.NBCB.104373
 Internet_ISP	Cox  
 ISP_Circuit_ID	487608-02
-Internet_IP_Remote	184.191.39.1
+Internet_IP_GW	184.191.39.1
 Internet_IP_Local	184.191.39.23
 Internet_Mask_Local	255.255.255.224 
 Router_Loopback	10.81.0.46
