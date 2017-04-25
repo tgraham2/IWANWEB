@@ -407,7 +407,24 @@ class WRITE:
             # upload vars file
             varFile = '%s-vars' % (nodeName)
             apic = apic_api(apic_em_address,apic_em_uid,apic_em_pwd)
-            apic.upload('%s/%s' % (usrData,varFile) )
+            result = apic.upload('%s/%s' % (usrData,varFile) )
+            print 'R:',result.status_code
+            if result.status_code <> 200:
+                if result.json()['response']['errorCode'] == 'FILE_ALREADY_EXISTS':
+                    cid = apic.get_config_id(varFile)
+                    print 'id for',varFile,'is',cid
+                    dresult = apic.deleteConfig(cid)
+                    print 'delete config:',dresult
+                    # wait for task to complete
+                    while 1:
+                        tresult = apic.ckTask(dresult.json()['response']['taskId'])
+                        print tresult
+                        print tresult.json()
+                        if 'done':
+                            break
+                    apic = apic_api(apic_em_address,apic_em_uid,apic_em_pwd)
+                    result2 = apic.upload('%s/%s' % (usrData,varFile))
+                    print 'upload config2',result2.json()['response']
             cid = apic.get_config_id(varFile)
             print ('id for',varFile,'is',cid)
             raise web.seeother('/output')
@@ -416,7 +433,7 @@ class WRITE:
             # upload configuration to project in APIC-EM
             # need to add code to support 2nd router
             cfgFile = '%sR01-cfg' % (nodeName)
-            #print "using %s @ %s" % (apic_em_uid,apic_em_address)
+            print "using %s @ %s > %s" % (apic_em_uid,apic_em_address,cfgFile)
             apic = apic_api(apic_em_address,apic_em_uid,apic_em_pwd)
             result = apic.upload('%s/%s' % (usrData,cfgFile))
             print (result.json())
@@ -432,23 +449,41 @@ class WRITE:
                 #print 'delete config:',result
                 apic = apic_api(apic_em_address,apic_em_uid,apic_em_pwd)
                 result = apic.upload('%s/%s' % (usrData,cfgFile))
-                #print 'upload config2',result['response']
-                #
-            cid = apic.get_config_id(cfgFile)
-            #print 'id for',cfgFile,'is',cid
-            #print 'project:',x_dict['AE_Project'][1]
-            pid = apic.get_project('demo')
-            # create a new device in PnP
-            device = [{
-                "serialNumber":x_dict['SerialNo'][1],
-                "configId":cid,
-                "platformId":x_dict['Router_Model'][1],
-                "hostName":"%s_%s_R_01" % (x_dict['City'][1],x_dict['SiteNo'][1])
-                }]
-            result = apic.new_device(pid, device )
-            print ("NEWDEV:", result)
-            raise web.seeother('/output')                      
+                print 'R:',result.status_code
+                if result.status_code <> 200:
+                    if result.json()['response']['errorCode'] == 'FILE_ALREADY_EXISTS':
+                        cid = apic.get_config_id(cfgFile)
+                        print 'id for',cfgFile,'is',cid
+                        dresult = apic.deleteConfig(cid)
+                        print 'delete config:',dresult
+                        # wait for task to complete
+                        while 1:
+                            tresult = apic.ckTask(dresult.json()['response']['taskId'])
+                            print tresult
+                            print tresult.json()
+                            if 'done':
+                                break
+                        apic = apic_api(apic_em_address,apic_em_uid,apic_em_pwd)
+                        result2 = apic.upload('%s/%s' % (usrData,cfgFile))
+                        print 'upload config2',result2.json()['response']
+                    #
+                cid = apic.get_config_id(cfgFile)
+                print 'id for',cfgFile,'is',cid
+                print 'project:',x_dict['AE_Project'][1]
+                pid = apic.get_project(x_dict['AE_Project'][1])
+                # create a new device in PnP
+                device = [{
+                    "serialNumber":x_dict['SerialNo'][1],
+                    "configId":cid,
+                    "platformId":x_dict['Router_Model'][1],
+                    "hostName":"%s_%s" % (x_dict['City'][1],cfgFile)
+                    }]
+                result = apic.new_device(pid, device )
+                print "NEWDEV:", result
+                                   
         else:
             raise Exception('error WRITE/POST')
+        raise web.seeother('/output')
+
 if __name__ == '__main__':
         app.run()
